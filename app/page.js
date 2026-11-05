@@ -1,87 +1,74 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
-async function getConnectionStatus() {
-  const supabase = await createClient();
-  if (!supabase) return { connected: false, message: "Supabase keys not configured yet" };
-
-  const { error } = await supabase.from("categories").select("id").limit(1);
-  if (error) {
-    return { connected: false, message: "Supabase is configured, but database setup is incomplete" };
-  }
-  return { connected: true, message: "Supabase database is reachable" };
-}
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const status = await getConnectionStatus();
+  const supabase = await createClient();
+  let user = null;
+
+  if (supabase) {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user ?? null;
+  }
 
   return (
     <main className="site-shell">
       <header className="topbar">
-        <Link className="brand" href="/">onion<span>frys</span>.</Link>
+        <Link className="brand" href="/">onion<span>frys.</span></Link>
         <nav className="nav">
-          <a className="hide-mobile" href="#approach">How it works</a>
-          <Link href="/admin">Admin preview</Link>
-          <a className="nav-cta" href="#foundation">Project status</a>
+          <Link href="/products">Explore</Link>
+          {user ? <Link href="/account">My account</Link> : <Link href="/login">Sign in</Link>}
+          {user
+            ? <Link className="nav-cta" href="/account">Account</Link>
+            : <Link className="nav-cta" href="/register">Create account</Link>}
         </nav>
       </header>
 
       <section className="hero">
         <div>
-          <div className="eyebrow">The ecommerce growth lab</div>
-          <h1>Good products.<br /><em>Smarter growth.</em></h1>
+          <div className="eyebrow">A small store. A serious growth lab.</div>
+          <h1>Good things.<br /><em>Odd energy.</em></h1>
           <p className="hero-copy">
-            OnionFrys is a working ecommerce sandbox built to explore the complete
-            customer journey — from first click to repeat purchase.
+            OnionFrys is an ecommerce sandbox for testing product discovery,
+            customer journeys and growth experiments.
           </p>
           <div className="hero-actions">
-            <a className="button primary" href="#approach">Explore the project</a>
-            <Link className="button secondary" href="/admin">Open admin preview ↗</Link>
+            <Link className="button primary" href="/register">Create an account</Link>
+            <Link className="button secondary" href="/login">Sign in</Link>
           </div>
         </div>
-        <div className="hero-art" aria-label="Playful potato illustration">
+        <div className="hero-art" aria-label="Decorative potato illustration">
           <div className="orbit"><div className="potato">🥔</div></div>
-          <div className="art-label">TEST • LEARN • GROW</div>
+          <div className="art-label">TEST • LEARN • OPTIMIZE</div>
         </div>
       </section>
 
-      <section className="section" id="approach">
+      <section className="section">
         <div className="section-head">
-          <div>
-            <div className="eyebrow">One connected system</div>
-            <h2>Storefront meets growth operations.</h2>
-          </div>
-          <p className="muted">One application. One database. Two interfaces.</p>
+          <div><div className="eyebrow">Module 2</div><h2>Customer identity is ready.</h2></div>
         </div>
         <div className="feature-grid">
-          <article className="feature-card">
-            <div className="feature-number">01 / STOREFRONT</div>
-            <h3>Customer experience</h3>
-            <p className="muted">Product discovery, cart, checkout, accounts and post-purchase journeys.</p>
-          </article>
-          <article className="feature-card">
-            <div className="feature-number">02 / ADMIN + CRM</div>
-            <h3>Customer operations</h3>
-            <p className="muted">Products, inventory, orders, customer profiles, segments and lifecycle activity.</p>
-          </article>
-          <article className="feature-card">
-            <div className="feature-number">03 / GROWTH</div>
-            <h3>Measurement + experiments</h3>
-            <p className="muted">UTMs, GTM, GA4, funnels, CRO experiments, retention and business analytics.</p>
-          </article>
-        </div>
-        <div className="status-panel" id="foundation">
-          <div>
-            <div className="eyebrow">Foundation check</div>
-            <strong><span className="status-dot" />{status.message}</strong>
+          <div className="feature-card">
+            <span className="feature-number">01 / AUTH</span>
+            <h3>Customer accounts</h3>
+            <p className="muted">Register, sign in and securely access your account.</p>
           </div>
-          <span className="pill">{status.connected ? "DATABASE CONNECTED" : "SETUP IN PROGRESS"}</span>
+          <div className="feature-card">
+            <span className="feature-number">02 / ACCESS</span>
+            <h3>Protected admin</h3>
+            <p className="muted">Admin permission is checked on the server and in the database.</p>
+          </div>
+          <div className="feature-card">
+            <span className="feature-number">03 / NEXT</span>
+            <h3>Store catalogue</h3>
+            <p className="muted">Product browsing and management arrive in Module 3.</p>
+          </div>
         </div>
       </section>
-
       <footer className="footer">
-        <span>© {new Date().getFullYear()} OnionFrys</span>
-        <span>Built as a Growth Engineering portfolio project.</span>
+        <span>onionfrys. — Growth Engineering sandbox</span>
+        <Link href="/admin">Admin workspace</Link>
       </footer>
     </main>
   );
