@@ -1,43 +1,63 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import SignOutButton from "@/components/sign-out-button";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPreviewPage() {
+export default async function AdminPage() {
   const supabase = await createClient();
-  let databaseStatus = "Not configured";
-  if (supabase) {
-    const { error } = await supabase.from("categories").select("id").limit(1);
-    databaseStatus = error ? "Needs database setup" : "Connected";
+  if (!supabase) redirect("/login?next=/admin");
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) redirect("/login?next=/admin");
+
+  // The database function is the authorization authority; never trust browser-supplied roles.
+  const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
+
+  if (adminError || isAdmin !== true) {
+    return (
+      <main className="auth-shell">
+        <section className="auth-card">
+          <div className="eyebrow">Restricted area</div>
+          <h1>Access denied</h1>
+          <p className="muted">This account does not have administrator permission.</p>
+          <p className="muted small-note">Signed in as {user.email}</p>
+          <div className="hero-actions">
+            <Link className="button secondary" href="/account">My account</Link>
+            <SignOutButton />
+          </div>
+        </section>
+      </main>
+    );
   }
 
   return (
     <main className="site-shell">
       <header className="topbar">
         <Link className="brand" href="/">onion<span>frys.</span></Link>
-        <nav className="nav"><Link href="/">← Back to storefront</Link></nav>
+        <nav className="nav">
+          <Link href="/">Storefront</Link>
+          <SignOutButton />
+        </nav>
       </header>
       <section className="admin-wrap">
-        <div className="eyebrow">Operations workspace / foundation preview</div>
-        <h1 style={{ fontSize: "clamp(38px, 6vw, 64px)", letterSpacing: "-3px", margin: "14px 0" }}>Admin & CRM</h1>
-        <p className="muted" style={{ maxWidth: 650 }}>
-          This is the starting shell for the operations side of OnionFrys. Product,
-          order and customer management will be added in later modules.
-        </p>
+        <div className="eyebrow">Operations workspace / secure admin</div>
+        <h1 className="admin-title">Admin & CRM</h1>
+        <p className="muted">Administrator access verified by Supabase Auth and the database.</p>
         <div className="admin-card">
-          <span className="pill">MODULE 1</span>
-          <h2>Foundation status</h2>
-          <p className="muted">Supabase database: <strong>{databaseStatus}</strong></p>
+          <span className="pill">MODULE 2</span>
+          <h2>Security foundation</h2>
+          <p className="muted">Signed in as <strong>{user.email}</strong></p>
           <p className="muted">
-            Security note: this route currently contains no private customer data or
-            management actions. Authentication and server-side admin authorization
-            must be completed before real admin functionality is added.
+            Your admin role is checked server-side using <code>public.is_admin()</code>.
+            Product and order management will be added in later modules.
           </p>
         </div>
         <div className="admin-card">
-          <h2>Planned workspace</h2>
+          <h2>Next workspace modules</h2>
           <div className="feature-grid">
-            <div><strong>Products & inventory</strong><p className="muted">Catalogue, variants and stock.</p></div>
+            <div><strong>Products & inventory</strong><p className="muted">Catalogue and stock management.</p></div>
             <div><strong>Orders</strong><p className="muted">Order processing and simulated payments.</p></div>
             <div><strong>Customers & CRM</strong><p className="muted">Profiles, tags, segments and lifecycle.</p></div>
           </div>
