@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/sign-out-button";
 import AdminOrders from "@/components/admin-orders";
+import AdminCustomers from "@/components/admin-customers";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,7 @@ export default async function AdminPage() {
     .from("orders")
     .select(`
       id,
+      user_id,
       order_number,
       customer_email,
       customer_name,
@@ -65,6 +67,9 @@ export default async function AdminPage() {
     `)
     .order("created_at", { ascending: false })
     .limit(100);
+
+  const { data: customers, error: customersError } =
+    await supabase.rpc("get_admin_customers");
 
   return (
     <main className="site-shell">
@@ -89,12 +94,14 @@ export default async function AdminPage() {
         </p>
 
         <div className="admin-card">
-          <span className="pill">MODULE 5</span>
+          <span className="pill">MODULE 5A</span>
           <h2>Order management</h2>
           <p className="muted">
             Manage customer orders and fulfilment status.
           </p>
-          <p><strong>Total orders:</strong> {orders?.length || 0}</p>
+          <p>
+            <strong>Total orders:</strong> {orders?.length || 0}
+          </p>
         </div>
 
         {ordersError ? (
@@ -103,6 +110,19 @@ export default async function AdminPage() {
           </div>
         ) : (
           <AdminOrders initialOrders={orders || []} />
+        )}
+
+        {customersError ? (
+          <div className="admin-card">
+            <p>
+              Unable to load customers: {customersError.message}
+            </p>
+          </div>
+        ) : (
+          <AdminCustomers
+            initialCustomers={customers || []}
+            initialOrders={orders || []}
+          />
         )}
       </section>
     </main>
