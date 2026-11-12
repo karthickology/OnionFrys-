@@ -17,31 +17,43 @@ export default function AdminOrders({ initialOrders }) {
   const [orders, setOrders] = useState(initialOrders);
   const [drafts, setDrafts] = useState({});
   const [savingId, setSavingId] = useState("");
-  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState({});
 
   async function saveStatus(orderId, currentStatus) {
     const newStatus = drafts[orderId] || currentStatus;
 
     if (newStatus === currentStatus) {
-      setMessage("No status change to save.");
+      setMessages((current) => ({
+        ...current,
+        [orderId]: "No status change selected.",
+      }));
       return;
     }
 
     setSavingId(orderId);
-    setMessage("");
+
+    setMessages((current) => ({
+      ...current,
+      [orderId]: "Saving status...",
+    }));
 
     try {
       const result = await updateOrderStatus(orderId, newStatus);
 
-      if (!result.success) {
-        setMessage(result.message);
+      if (!result || !result.success) {
+        setMessages((current) => ({
+          ...current,
+          [orderId]: result?.message || "Status update failed.",
+        }));
         return;
       }
+
+      const savedStatus = result.status || newStatus;
 
       setOrders((current) =>
         current.map((order) =>
           order.id === orderId
-            ? { ...order, status: newStatus }
+            ? { ...order, status: savedStatus }
             : order
         )
       );
@@ -52,9 +64,15 @@ export default function AdminOrders({ initialOrders }) {
         return updated;
       });
 
-      setMessage(result.message);
-    } catch {
-      setMessage("Unable to update order status.");
+      setMessages((current) => ({
+        ...current,
+        [orderId]: result.message || `Status saved as ${savedStatus}.`,
+      }));
+    } catch (error) {
+      setMessages((current) => ({
+        ...current,
+        [orderId]: error?.message || "Unable to update order status.",
+      }));
     } finally {
       setSavingId("");
     }
@@ -66,10 +84,6 @@ export default function AdminOrders({ initialOrders }) {
 
   return (
     <div>
-      {message && (
-        <p className="muted" role="status">{message}</p>
-      )}
-
       {orders.map((order) => (
         <article
           key={order.id}
@@ -99,9 +113,18 @@ export default function AdminOrders({ initialOrders }) {
 
           <hr />
 
-          <p><strong>Customer:</strong> {order.customer_name || "Not provided"}</p>
-          <p><strong>Email:</strong> {order.customer_email}</p>
-          <p><strong>Order status:</strong> {order.status}</p>
+          <p>
+            <strong>Customer:</strong>{" "}
+            {order.customer_name || "Not provided"}
+          </p>
+
+          <p>
+            <strong>Email:</strong> {order.customer_email}
+          </p>
+
+          <p>
+            <strong>Order status:</strong> {order.status}
+          </p>
 
           <h3>Purchased products</h3>
 
@@ -119,7 +142,9 @@ export default function AdminOrders({ initialOrders }) {
               <span>
                 {item.product_name} × {item.quantity}
               </span>
-              <strong>{formatPrice(Number(item.line_total))}</strong>
+              <strong>
+                {formatPrice(Number(item.line_total))}
+              </strong>
             </div>
           ))}
 
@@ -127,7 +152,8 @@ export default function AdminOrders({ initialOrders }) {
             <label>
               Update order status
               <select
-                value={drafts[order.id] || order.status}
+                value={drafts[order.id] ?? order.status}
+                disabled={savingId === order.id}
                 onChange={(event) =>
                   setDrafts((current) => ({
                     ...current,
@@ -159,6 +185,12 @@ export default function AdminOrders({ initialOrders }) {
             >
               {savingId === order.id ? "Saving..." : "Save status"}
             </button>
+
+            {messages[order.id] && (
+              <p role="status" className="muted">
+                {messages[order.id]}
+              </p>
+            )}
           </div>
         </article>
       ))}
