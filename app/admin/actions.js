@@ -56,8 +56,8 @@ export async function updateOrderStatus(orderId, newStatus) {
 
   revalidatePath("/admin");
 
-  return {
-    success: true,
-    message: `Order status saved as ${data.status}.`,
-  };
-}
+return {
+  success: true,
+  status: data.status,
+  message: `Order status saved as ${data.status}.`,
+};
