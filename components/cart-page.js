@@ -162,9 +162,12 @@ export default function CartPage() {
               calculated at checkout.
             </p>
 
-            <button type="button" disabled>
-              Checkout — available in Module 4C
-            </button>
+            <Link
+              href="/checkout"
+              className="cart-primary-link"
+            >
+              Proceed to checkout
+            </Link>
           </aside>
         </div>
       )}
