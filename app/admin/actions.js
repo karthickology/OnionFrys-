@@ -23,9 +23,7 @@ export async function updateOrderStatus(orderId, newStatus) {
     return { success: false, message: "Supabase is not configured." };
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     return { success: false, message: "Please sign in." };
@@ -38,16 +36,28 @@ export async function updateOrderStatus(orderId, newStatus) {
     return { success: false, message: "Administrator access required." };
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("orders")
     .update({ status: newStatus })
-    .eq("id", orderId);
+    .eq("id", orderId)
+    .select("id, status")
+    .maybeSingle();
 
   if (error) {
     return { success: false, message: error.message };
   }
 
+  if (!data) {
+    return {
+      success: false,
+      message: "No order was updated. Check the database permissions.",
+    };
+  }
+
   revalidatePath("/admin");
 
-  return { success: true, message: "Order status updated." };
+  return {
+    success: true,
+    message: `Order status saved as ${data.status}.`,
+  };
 }
