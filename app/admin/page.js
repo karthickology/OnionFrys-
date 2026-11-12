@@ -1,19 +1,26 @@
+
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/sign-out-button";
+import AdminOrders from "@/components/admin-orders";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const supabase = await createClient();
+
   if (!supabase) redirect("/login?next=/admin");
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
   if (userError || !user) redirect("/login?next=/admin");
 
-  // The database function is the authorization authority; never trust browser-supplied roles.
-  const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
+  const { data: isAdmin, error: adminError } =
+    await supabase.rpc("is_admin");
 
   if (adminError || isAdmin !== true) {
     return (
@@ -21,10 +28,14 @@ export default async function AdminPage() {
         <section className="auth-card">
           <div className="eyebrow">Restricted area</div>
           <h1>Access denied</h1>
-          <p className="muted">This account does not have administrator permission.</p>
-          <p className="muted small-note">Signed in as {user.email}</p>
+          <p className="muted">
+            This account does not have administrator permission.
+          </p>
+          <p className="muted small-note">{user.email}</p>
           <div className="hero-actions">
-            <Link className="button secondary" href="/account">My account</Link>
+            <Link className="button secondary" href="/account">
+              My account
+            </Link>
             <SignOutButton />
           </div>
         </section>
@@ -32,36 +43,67 @@ export default async function AdminPage() {
     );
   }
 
+  const { data: orders, error: ordersError } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      order_number,
+      customer_email,
+      customer_name,
+      status,
+      payment_status,
+      currency,
+      total,
+      created_at,
+      order_items (
+        id,
+        product_name,
+        quantity,
+        unit_price,
+        line_total
+      )
+    `)
+    .order("created_at", { ascending: false })
+    .limit(100);
+
   return (
     <main className="site-shell">
       <header className="topbar">
-        <Link className="brand" href="/">onion<span>frys.</span></Link>
+        <Link className="brand" href="/">
+          onion<span>frys.</span>
+        </Link>
         <nav className="nav">
           <Link href="/">Storefront</Link>
           <SignOutButton />
         </nav>
       </header>
+
       <section className="admin-wrap">
-        <div className="eyebrow">Operations workspace / secure admin</div>
+        <div className="eyebrow">
+          Operations workspace / secure admin
+        </div>
+
         <h1 className="admin-title">Admin & CRM</h1>
-        <p className="muted">Administrator access verified by Supabase Auth and the database.</p>
+        <p className="muted">
+          Signed in as {user.email}
+        </p>
+
         <div className="admin-card">
-          <span className="pill">MODULE 2</span>
-          <h2>Security foundation</h2>
-          <p className="muted">Signed in as <strong>{user.email}</strong></p>
+          <span className="pill">MODULE 5</span>
+          <h2>Order management</h2>
           <p className="muted">
-            Your admin role is checked server-side using <code>public.is_admin()</code>.
-            Product and order management will be added in later modules.
+            Manage customer orders and fulfilment status.
           </p>
+          <p><strong>Total orders:</strong> {orders?.length || 0}</p>
         </div>
-        <div className="admin-card">
-          <h2>Next workspace modules</h2>
-          <div className="feature-grid">
-            <div><strong>Products & inventory</strong><p className="muted">Catalogue and stock management.</p></div>
-            <div><strong>Orders</strong><p className="muted">Order processing and simulated payments.</p></div>
-            <div><strong>Customers & CRM</strong><p className="muted">Profiles, tags, segments and lifecycle.</p></div>
+
+        {ordersError ? (
+          <div className="admin-card">
+            <p>Unable to load orders: {ordersError.message}</p>
           </div>
-        </div>
+        ) : (
+          <AdminOrders initialOrders={orders || []} />
+        )}
       </section>
     </main>
   );
