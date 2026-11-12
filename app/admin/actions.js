@@ -20,10 +20,15 @@ export async function updateOrderStatus(orderId, newStatus) {
   const supabase = await createClient();
 
   if (!supabase) {
-    return { success: false, message: "Supabase is not configured." };
+    return {
+      success: false,
+      message: "Supabase is not configured.",
+    };
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     return { success: false, message: "Please sign in." };
@@ -33,7 +38,10 @@ export async function updateOrderStatus(orderId, newStatus) {
     await supabase.rpc("is_admin");
 
   if (adminError || isAdmin !== true) {
-    return { success: false, message: "Administrator access required." };
+    return {
+      success: false,
+      message: "Administrator access required.",
+    };
   }
 
   const { data, error } = await supabase
@@ -50,14 +58,15 @@ export async function updateOrderStatus(orderId, newStatus) {
   if (!data) {
     return {
       success: false,
-      message: "No order was updated. Check the database permissions.",
+      message: "No order was updated. Check database permissions.",
     };
   }
 
   revalidatePath("/admin");
 
-return {
-  success: true,
-  status: data.status,
-  message: `Order status saved as ${data.status}.`,
-};
+  return {
+    success: true,
+    status: data.status,
+    message: `Order status saved as ${data.status}.`,
+  };
+}
