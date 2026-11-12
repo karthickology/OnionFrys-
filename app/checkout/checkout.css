@@ -1,0 +1,130 @@
+
+.checkout-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px 70px;
+}
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.checkout-card {
+  background: white;
+  color: #222;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 28px;
+}
+
+.checkout-card h1 {
+  font-size: 28px;
+  margin: 8px 0 12px;
+}
+
+.checkout-card h2 {
+  font-size: 18px;
+  margin: 28px 0 14px;
+}
+
+.checkout-muted {
+  color: #777;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.checkout-card label {
+  display: block;
+  margin: 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.checkout-card input {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.checkout-card input:focus {
+  outline: 2px solid #333;
+  outline-offset: 1px;
+}
+
+.checkout-button {
+  display: block;
+  width: 100%;
+  margin-top: 22px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #222;
+  color: white;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.checkout-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.checkout-summary {
+  position: sticky;
+  top: 20px;
+}
+
+.checkout-item,
+.checkout-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.checkout-total {
+  margin-top: 12px;
+  font-size: 17px;
+  border-bottom: 0;
+}
+
+.checkout-back {
+  display: inline-block;
+  margin-top: 16px;
+  color: #333;
+  font-size: 14px;
+}
+
+.checkout-message {
+  padding: 12px;
+  margin-top: 16px;
+  border-radius: 8px;
+  background: #fff1f1;
+  color: #a32121;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-summary {
+    position: static;
+  }
+
+  .checkout-card {
+    padding: 20px;
+  }
+}
