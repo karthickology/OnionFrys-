@@ -7,6 +7,7 @@ import {
   AddToCartButton,
   CartLink,
 } from "@/components/cart-controls";
+import { ProductViewTracker } from "@/components/product-view-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,8 @@ export default async function ProductDetailPage({ params }) {
 
   return (
     <main className="catalog-page">
+      <ProductViewTracker product={product} />
+
       <header className="catalog-topbar">
         <Link className="catalog-brand" href="/">
           onion<span>frys.</span>
