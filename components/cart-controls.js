@@ -8,6 +8,7 @@ import {
   cartEventName,
   readCart,
 } from "@/lib/cart-storage";
+import { pushEcommerceEvent } from "@/lib/data-layer";
 
 export function AddToCartButton({ product, className = "" }) {
   const [added, setAdded] = useState(false);
@@ -19,7 +20,7 @@ export function AddToCartButton({ product, className = "" }) {
   function handleAdd() {
     if (!canAdd) return;
 
-    addCartItem({
+    const item = {
       productId: product.id,
       variantId: product.variantId,
       name: product.name,
@@ -30,6 +31,23 @@ export function AddToCartButton({ product, className = "" }) {
       imageUrl: product.image?.url || "",
       imageAlt: product.image?.alt || product.name,
       stock: Number(product.stock),
+    };
+
+    addCartItem(item);
+
+    pushEcommerceEvent("add_to_cart", {
+      currency: item.currency,
+      value: item.price,
+      items: [
+        {
+          item_id: item.productId,
+          item_name: item.name,
+          item_variant: item.variantId,
+          item_sku: item.sku,
+          price: item.price,
+          quantity: 1,
+        },
+      ],
     });
 
     setAdded(true);
