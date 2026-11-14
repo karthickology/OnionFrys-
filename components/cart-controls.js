@@ -8,7 +8,10 @@ import {
   cartEventName,
   readCart,
 } from "@/lib/cart-storage";
-import { pushEcommerceEvent } from "@/lib/data-layer";
+import {
+  formatEcommerceItem,
+  trackEcommerce,
+} from "@/lib/data-layer";
 
 export function AddToCartButton({ product, className = "" }) {
   const [added, setAdded] = useState(false);
@@ -35,19 +38,10 @@ export function AddToCartButton({ product, className = "" }) {
 
     addCartItem(item);
 
-    pushEcommerceEvent("add_to_cart", {
+    trackEcommerce("add_to_cart", {
       currency: item.currency,
       value: item.price,
-      items: [
-        {
-          item_id: item.productId,
-          item_name: item.name,
-          item_variant: item.variantId,
-          item_sku: item.sku,
-          price: item.price,
-          quantity: 1,
-        },
-      ],
+      items: [formatEcommerceItem(item, 1)],
     });
 
     setAdded(true);
