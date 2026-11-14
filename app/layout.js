@@ -1,6 +1,7 @@
 
 import "./globals.css";
 import Script from "next/script";
+import TrackingInitializer from "@/components/tracking-initializer";
 
 export const metadata = {
   title: "OnionFrys — Growth Engineering Sandbox",
@@ -24,6 +25,8 @@ export default function RootLayout({ children }) {
             `
           }}
         />
+
+        <TrackingInitializer />
 
         {children}
       </body>
