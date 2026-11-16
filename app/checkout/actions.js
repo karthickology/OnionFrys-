@@ -50,7 +50,10 @@ export async function createOrder(input) {
         item.quantity > 20
     )
   ) {
-    return { success: false, message: "Invalid cart items. Refresh your cart." };
+    return {
+      success: false,
+      message: "Invalid cart items. Refresh your cart.",
+    };
   }
 
   const address = input?.shippingAddress || {};
@@ -64,7 +67,10 @@ export async function createOrder(input) {
   ];
 
   if (requiredFields.some((field) => !String(address[field] || "").trim())) {
-    return { success: false, message: "Complete all required shipping fields." };
+    return {
+      success: false,
+      message: "Complete all required shipping fields.",
+    };
   }
 
   const { data: profile } = await supabase
@@ -99,6 +105,20 @@ export async function createOrder(input) {
       success: false,
       message: "The simulated payment was unsuccessful.",
     };
+  }
+
+  // Mark this customer's cart as converted after a successful order.
+  const { error: cartError } = await supabase
+    .from("customer_carts")
+    .update({
+      status: "converted",
+      abandoned_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", user.id);
+
+  if (cartError) {
+    console.error("Cart conversion update failed:", cartError.message);
   }
 
   return {
