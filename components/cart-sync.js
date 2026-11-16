@@ -17,7 +17,9 @@ export default function CartSync() {
 
     let active = true;
     let syncing = false;
+    let currentUser = null;
     let currentUserId = null;
+    let changedDuringSync = false;
 
     function mergeCarts(localItems, remoteItems) {
       const merged = new Map();
@@ -47,7 +49,7 @@ export default function CartSync() {
     }
 
     async function saveCart(user) {
-      if (!user || syncing || !active) return;
+      if (!user || !active) return;
 
       const items = readCart();
 
@@ -81,10 +83,12 @@ export default function CartSync() {
     }
 
     async function syncUser(user) {
-      if (!user || !active) return;
+      if (!user || !active || syncing) return;
 
       syncing = true;
+      currentUser = user;
       currentUserId = user.id;
+      changedDuringSync = false;
 
       const { data, error } = await supabase
         .from("customer_carts")
@@ -98,10 +102,7 @@ export default function CartSync() {
         return;
       }
 
-      if (!active) {
-        syncing = false;
-        return;
-      }
+      if (!active) return;
 
       const remoteItems = Array.isArray(data?.items)
         ? data.items
@@ -114,18 +115,28 @@ export default function CartSync() {
 
       writeCart(mergedItems);
 
+      syncing = false;
+
+      // Save the merged cart to Supabase.
       await saveCart(user);
 
-      syncing = false;
+      // Preserve changes made while the initial sync was running.
+      if (changedDuringSync && active) {
+        changedDuringSync = false;
+        await saveCart(user);
+      }
     }
 
-    let currentUser = null;
+    function cartHandler() {
+      if (!currentUser) return;
 
-    const cartHandler = () => {
-      if (currentUser && !syncing) {
-        saveCart(currentUser);
+      if (syncing) {
+        changedDuringSync = true;
+        return;
       }
-    };
+
+      saveCart(currentUser);
+    }
 
     window.addEventListener(cartEventName(), cartHandler);
 
@@ -136,7 +147,6 @@ export default function CartSync() {
       }
 
       if (data.user && active) {
-        currentUser = data.user;
         syncUser(data.user);
       }
     });
