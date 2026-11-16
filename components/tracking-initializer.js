@@ -11,7 +11,22 @@ function captureFirstTouch() {
   try {
     const existing = localStorage.getItem(STORAGE_KEY);
 
-    if (existing) return JSON.parse(existing);
+    if (existing) {
+      const saved = JSON.parse(existing);
+
+      const hasSavedUtm = [
+        saved.source,
+        saved.medium,
+        saved.campaign,
+        saved.content,
+        saved.term,
+      ].some(Boolean);
+
+      if (hasSavedUtm) return saved;
+
+      // Remove an old empty attribution record.
+      localStorage.removeItem(STORAGE_KEY);
+    }
 
     const params = new URLSearchParams(window.location.search);
 
@@ -24,6 +39,17 @@ function captureFirstTouch() {
       landing_page: window.location.pathname.slice(0, 1000),
       referrer: document.referrer.slice(0, 1000) || null,
     };
+
+    const hasUtm = [
+      attribution.source,
+      attribution.medium,
+      attribution.campaign,
+      attribution.content,
+      attribution.term,
+    ].some(Boolean);
+
+    // Do not save empty/direct visits as UTM attribution.
+    if (!hasUtm) return null;
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(attribution));
 
