@@ -107,18 +107,23 @@ export async function createOrder(input) {
     };
   }
 
-  // Mark this customer's cart as converted after a successful order.
+  // Mark the cart as converted and clear its saved products.
   const { error: cartError } = await supabase
     .from("customer_carts")
     .update({
       status: "converted",
+      items: [],
+      subtotal: 0,
       abandoned_at: null,
       updated_at: new Date().toISOString(),
     })
     .eq("user_id", user.id);
 
   if (cartError) {
-    console.error("Cart conversion update failed:", cartError.message);
+    console.error(
+      "Cart conversion update failed:",
+      cartError.message
+    );
   }
 
   return {
