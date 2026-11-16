@@ -71,6 +71,44 @@ export default async function AdminPage() {
   const { data: customers, error: customersError } =
     await supabase.rpc("get_admin_customers");
 
+  const { data: carts, error: cartsError } = await supabase
+    .from("customer_carts")
+    .select(`
+      id,
+      user_id,
+      email,
+      items,
+      subtotal,
+      currency,
+      status,
+      last_activity_at,
+      abandoned_at
+    `)
+    .order("last_activity_at", { ascending: false })
+    .limit(50);
+
+  const { data: automationLogs, error: logsError } =
+    await supabase
+      .from("automation_logs")
+      .select(`
+        id,
+        user_id,
+        automation_type,
+        status,
+        details,
+        executed_at
+      `)
+      .order("executed_at", { ascending: false })
+      .limit(20);
+
+  const activeCarts = (carts || []).filter(
+    (cart) => cart.status === "active"
+  ).length;
+
+  const abandonedCarts = (carts || []).filter(
+    (cart) => cart.status === "abandoned"
+  ).length;
+
   return (
     <main className="site-shell">
       <header className="topbar">
@@ -93,6 +131,7 @@ export default async function AdminPage() {
           Signed in as {user.email}
         </p>
 
+        {/* MODULE 5A */}
         <div className="admin-card">
           <span className="pill">MODULE 5A</span>
           <h2>Order management</h2>
@@ -112,6 +151,7 @@ export default async function AdminPage() {
           <AdminOrders initialOrders={orders || []} />
         )}
 
+        {/* MODULE 5B */}
         {customersError ? (
           <div className="admin-card">
             <p>
@@ -124,6 +164,88 @@ export default async function AdminPage() {
             initialOrders={orders || []}
           />
         )}
+
+        {/* MODULE 7 */}
+        <section className="admin-card">
+          <span className="pill">MODULE 7</span>
+          <h2>CRM Automation & Retention</h2>
+          <p className="muted">
+            Monitor customer carts and automation activity.
+          </p>
+
+          {cartsError ? (
+            <p>Unable to load carts: {cartsError.message}</p>
+          ) : (
+            <div className="admin-stats">
+              <div>
+                <h3>{activeCarts}</h3>
+                <p className="muted">Active carts</p>
+              </div>
+
+              <div>
+                <h3>{abandonedCarts}</h3>
+                <p className="muted">Abandoned carts</p>
+              </div>
+            </div>
+          )}
+
+          <h3>Recent customer carts</h3>
+
+          {cartsError ? (
+            <p className="muted">Cart information unavailable.</p>
+          ) : !carts?.length ? (
+            <p className="muted">No customer carts found.</p>
+          ) : (
+            <div>
+              {carts.map((cart) => (
+                <div key={cart.id}>
+                  <p>
+                    <strong>{cart.email || cart.user_id}</strong>
+                  </p>
+                  <p className="muted">
+                    Status: {cart.status} · Products:{" "}
+                    {Array.isArray(cart.items)
+                      ? cart.items.length
+                      : 0}
+                  </p>
+                  <p className="muted">
+                    Last activity:{" "}
+                    {new Date(
+                      cart.last_activity_at
+                    ).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <h3>Automation activity</h3>
+
+          {logsError ? (
+            <p>Unable to load logs: {logsError.message}</p>
+          ) : !automationLogs?.length ? (
+            <p className="muted">
+              No automation executions recorded yet.
+            </p>
+          ) : (
+            <div>
+              {automationLogs.map((log) => (
+                <div key={log.id}>
+                  <p>
+                    <strong>{log.automation_type}</strong>
+                    {" — "}
+                    {log.status}
+                  </p>
+                  <p className="muted">
+                    {new Date(
+                      log.executed_at
+                    ).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </section>
     </main>
   );
