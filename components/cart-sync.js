@@ -61,6 +61,26 @@ export default function CartSync() {
         0
       );
 
+      const { data: existingCart, error: fetchError } =
+        await supabase
+          .from("customer_carts")
+          .select("status")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+      if (fetchError) {
+        console.error("Cart status retrieval failed:", fetchError.message);
+        return;
+      }
+
+      if (!active) return;
+
+      const isConverted =
+        items.length === 0 &&
+        existingCart?.status === "converted";
+
+      const now = new Date().toISOString();
+
       const { error } = await supabase
         .from("customer_carts")
         .upsert(
@@ -70,9 +90,11 @@ export default function CartSync() {
             items,
             currency: items[0]?.currency || "USD",
             subtotal,
-            status: "active",
-            last_activity_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            status: isConverted ? "converted" : "active",
+            last_activity_at: isConverted
+              ? undefined
+              : now,
+            updated_at: now,
           },
           { onConflict: "user_id" }
         );
@@ -102,7 +124,10 @@ export default function CartSync() {
         return;
       }
 
-      if (!active) return;
+      if (!active) {
+        syncing = false;
+        return;
+      }
 
       const remoteItems = Array.isArray(data?.items)
         ? data.items
@@ -117,10 +142,8 @@ export default function CartSync() {
 
       syncing = false;
 
-      // Save the merged cart to Supabase.
       await saveCart(user);
 
-      // Preserve changes made while the initial sync was running.
       if (changedDuringSync && active) {
         changedDuringSync = false;
         await saveCart(user);
