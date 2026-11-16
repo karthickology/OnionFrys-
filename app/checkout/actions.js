@@ -73,7 +73,8 @@ export async function createOrder(input) {
     };
   }
 
-  const { data: profile } = await supabase
+  // Retrieve customer profile and first-touch attribution.
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select(`
       full_name,
@@ -86,6 +87,11 @@ export async function createOrder(input) {
     .eq("id", user.id)
     .maybeSingle();
 
+  if (profileError) {
+    console.error("Customer profile retrieval failed:", profileError.message);
+  }
+
+  // Create the simulated order.
   const { data, error } = await supabase.rpc("create_simulated_order", {
     p_customer_email: user.email,
     p_customer_name:
@@ -114,24 +120,32 @@ export async function createOrder(input) {
     };
   }
 
-  // Attach the customer's first-touch attribution to the new order.
-  const { error: attributionError } = await supabase.rpc(
-    "attach_order_attribution",
-    {
+  // Attach first-touch attribution to the new order.
+  const { data: attributionAttached, error: attributionError } =
+    await supabase.rpc("attach_order_attribution", {
       p_order_number: data.order_number,
       p_source: profile?.first_utm_source || null,
       p_medium: profile?.first_utm_medium || null,
       p_campaign: profile?.first_utm_campaign || null,
       p_content: profile?.first_utm_content || null,
       p_term: profile?.first_utm_term || null,
-    }
-  );
+    });
 
   if (attributionError) {
-    console.error(
-      "Order attribution failed:",
-      attributionError.message
-    );
+    console.error("Order attribution RPC error:", attributionError.message);
+  } else if (attributionAttached !== true) {
+    console.error("Order attribution was not attached:", {
+      orderNumber: data.order_number,
+      userId: user.id,
+      profileAttribution: {
+        source: profile?.first_utm_source || null,
+        medium: profile?.first_utm_medium || null,
+        campaign: profile?.first_utm_campaign || null,
+      },
+      rpcResult: attributionAttached,
+    });
+  } else {
+    console.log("Order attribution successfully attached:", data.order_number);
   }
 
   // Mark the cart as converted and clear its saved products.
