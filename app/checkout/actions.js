@@ -75,7 +75,14 @@ export async function createOrder(input) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select(`
+      full_name,
+      first_utm_source,
+      first_utm_medium,
+      first_utm_campaign,
+      first_utm_content,
+      first_utm_term
+    `)
     .eq("id", user.id)
     .maybeSingle();
 
@@ -107,6 +114,26 @@ export async function createOrder(input) {
     };
   }
 
+  // Attach the customer's first-touch attribution to the new order.
+  const { error: attributionError } = await supabase.rpc(
+    "attach_order_attribution",
+    {
+      p_order_number: data.order_number,
+      p_source: profile?.first_utm_source || null,
+      p_medium: profile?.first_utm_medium || null,
+      p_campaign: profile?.first_utm_campaign || null,
+      p_content: profile?.first_utm_content || null,
+      p_term: profile?.first_utm_term || null,
+    }
+  );
+
+  if (attributionError) {
+    console.error(
+      "Order attribution failed:",
+      attributionError.message
+    );
+  }
+
   // Mark the cart as converted and clear its saved products.
   const { error: cartError } = await supabase
     .from("customer_carts")
@@ -120,10 +147,7 @@ export async function createOrder(input) {
     .eq("user_id", user.id);
 
   if (cartError) {
-    console.error(
-      "Cart conversion update failed:",
-      cartError.message
-    );
+    console.error("Cart conversion update failed:", cartError.message);
   }
 
   return {
