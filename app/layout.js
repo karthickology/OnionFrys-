@@ -2,6 +2,7 @@
 import "./globals.css";
 import Script from "next/script";
 import TrackingInitializer from "@/components/tracking-initializer";
+import CartSync from "@/components/cart-sync";
 
 export const metadata = {
   title: "OnionFrys — Growth Engineering Sandbox",
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
         />
 
         <TrackingInitializer />
+        <CartSync />
 
         {children}
       </body>
