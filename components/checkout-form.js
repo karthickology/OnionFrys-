@@ -1,15 +1,20 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/format-price";
 import { readCart, writeCart } from "@/lib/cart-storage";
 import { createOrder } from "@/app/checkout/actions";
+import {
+  trackEcommerce,
+  formatEcommerceItem,
+} from "@/lib/data-layer";
 
 export default function CheckoutForm({ customerEmail, customerName }) {
   const router = useRouter();
+  const checkoutTracked = useRef(false);
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -29,6 +34,19 @@ export default function CheckoutForm({ customerEmail, customerName }) {
   useEffect(() => {
     setItems(readCart());
   }, []);
+
+  useEffect(() => {
+    if (items.length === 0 || checkoutTracked.current) return;
+
+    checkoutTracked.current = true;
+
+    trackEcommerce("begin_checkout", {
+      currency: "USD",
+      items: items.map((item) =>
+        formatEcommerceItem(item, item.quantity)
+      ),
+    });
+  }, [items]);
 
   function updateAddress(event) {
     const { name, value } = event.target;
