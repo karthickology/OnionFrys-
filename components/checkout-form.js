@@ -35,6 +35,7 @@ export default function CheckoutForm({ customerEmail, customerName }) {
     setItems(readCart());
   }, []);
 
+  // Track checkout when the customer reaches checkout.
   useEffect(() => {
     if (items.length === 0 || checkoutTracked.current) return;
 
@@ -77,6 +78,16 @@ export default function CheckoutForm({ customerEmail, customerName }) {
         setMessage(result.message || "Unable to place your order.");
         return;
       }
+
+      // Track purchase only after successful order creation.
+      trackEcommerce("purchase", {
+        currency: result.currency || "USD",
+        value: Number(result.total || 0),
+        transaction_id: result.orderNumber,
+        items: items.map((item) =>
+          formatEcommerceItem(item, item.quantity)
+        ),
+      });
 
       writeCart([]);
       setItems([]);
