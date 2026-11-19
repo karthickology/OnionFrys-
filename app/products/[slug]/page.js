@@ -19,8 +19,16 @@ export default async function ProductDetailPage({ params }) {
 
   const inStock = product.stock !== null && product.stock > 0;
 
+  const hasDiscount =
+    product.compare_at_price &&
+    Number(product.compare_at_price) > Number(product.price);
+
+  const savings = hasDiscount
+    ? Number(product.compare_at_price) - Number(product.price)
+    : 0;
+
   return (
-    <main className="catalog-page">
+    <main className="catalog-page product-page">
       <ProductViewTracker product={product} />
 
       <header className="catalog-topbar">
@@ -50,7 +58,7 @@ export default async function ProductDetailPage({ params }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={product.image.url}
-                alt={product.image.alt}
+                alt={product.image.alt || product.name}
               />
             ) : (
               <div className="product-image-placeholder detail-placeholder">
@@ -63,6 +71,12 @@ export default async function ProductDetailPage({ params }) {
                 </span>
                 <small>ONIONFRYS OBJECT</small>
               </div>
+            )}
+
+            {product.is_featured && (
+              <span className="product-image-badge">
+                Featured product
+              </span>
             )}
           </div>
 
@@ -85,45 +99,80 @@ export default async function ProductDetailPage({ params }) {
                 {formatPrice(product.price, product.currency)}
               </strong>
 
-              {product.compare_at_price &&
-                Number(product.compare_at_price) >
-                  Number(product.price) && (
+              {hasDiscount && (
+                <>
                   <del>
                     {formatPrice(
                       product.compare_at_price,
                       product.currency
                     )}
                   </del>
-                )}
+                  <span className="product-savings">
+                    Save {formatPrice(savings, product.currency)}
+                  </span>
+                </>
+              )}
             </div>
 
             <p className="product-detail-description">
               {product.description ||
-                "A little something from OnionFrys."}
+                "Discover this item from the OnionFrys collection."}
             </p>
 
-            <div
-              className={`product-stock ${
-                inStock ? "available" : "unavailable"
-              }`}
-            >
-              <span />
-              {product.stock === null
-                ? "Inventory not configured"
-                : inStock
-                  ? `${product.stock} available`
-                  : "Currently out of stock"}
+            <div className="product-detail-benefits">
+              <div>
+                <span>01</span>
+                <p>Clear product pricing</p>
+              </div>
+              <div>
+                <span>02</span>
+                <p>Inventory checked at checkout</p>
+              </div>
+              <div>
+                <span>03</span>
+                <p>Secure account-based ordering</p>
+              </div>
             </div>
 
-            <AddToCartButton product={product} />
+            <div className="product-stock-panel">
+              <div
+                className={`product-stock ${
+                  inStock ? "available" : "unavailable"
+                }`}
+              >
+                <span />
+                {product.stock === null
+                  ? "Inventory not configured"
+                  : inStock
+                    ? `${product.stock} available`
+                    : "Currently out of stock"}
+              </div>
 
-            <div className="product-detail-note">
-              Your cart is saved in this browser. Final price and
-              availability will be verified at checkout.
+              {product.sku && (
+                <span className="product-sku">
+                  SKU: {product.sku}
+                </span>
+              )}
+            </div>
+
+            <AddToCartButton
+              product={product}
+              className="product-detail-cta"
+            />
+
+            <div className="product-detail-trust">
+              <div>
+                <span>✓</span>
+                <p>Demo checkout with no real payment collection</p>
+              </div>
+              <div>
+                <span>✓</span>
+                <p>Final stock and pricing verified at checkout</p>
+              </div>
             </div>
 
             <Link className="catalog-back-link" href="/products">
-              ← Back to all products
+              ← Continue exploring products
             </Link>
           </div>
         </section>
