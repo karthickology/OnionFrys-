@@ -8,6 +8,7 @@ import {
   CartLink,
 } from "@/components/cart-controls";
 import { ProductViewTracker } from "@/components/product-view-tracker";
+import { ExperimentDescription } from "@/components/experiment-description";
 
 export const dynamic = "force-dynamic";
 
@@ -114,10 +115,7 @@ export default async function ProductDetailPage({ params }) {
               )}
             </div>
 
-            <p className="product-detail-description">
-              {product.description ||
-                "Discover this item from the OnionFrys collection."}
-            </p>
+            <ExperimentDescription product={product} />
 
             <div className="product-detail-benefits">
               <div>
