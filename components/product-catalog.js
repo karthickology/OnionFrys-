@@ -4,11 +4,24 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/format-price";
-import { AddToCartButton, CartLink } from "@/components/cart-controls";
+import {
+  AddToCartButton,
+  CartLink,
+} from "@/components/cart-controls";
 
-export default function ProductCatalog({ products, categories }) {
+export default function ProductCatalog({
+  products,
+  categories,
+  initialCategory = "",
+}) {
+  const selectedCategory = categories.find(
+    (item) => item.slug === initialCategory
+  );
+
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(
+    selectedCategory?.id || "all"
+  );
   const [sort, setSort] = useState("featured");
 
   const visibleProducts = useMemo(() => {
@@ -24,26 +37,38 @@ export default function ProductCatalog({ products, categories }) {
         );
 
       const matchesCategory =
-        category === "all" || product.categoryIds.includes(category);
+        category === "all" ||
+        product.categoryIds.includes(category);
 
       return matchesSearch && matchesCategory;
     });
 
     result = [...result];
 
-    if (sort === "price-low")
-      result.sort((a, b) => Number(a.price) - Number(b.price));
-
-    if (sort === "price-high")
-      result.sort((a, b) => Number(b.price) - Number(a.price));
-
-    if (sort === "name")
-      result.sort((a, b) => a.name.localeCompare(b.name));
-
-    if (sort === "featured")
+    if (sort === "price-low") {
       result.sort(
-        (a, b) => Number(b.is_featured) - Number(a.is_featured)
+        (a, b) => Number(a.price) - Number(b.price)
       );
+    }
+
+    if (sort === "price-high") {
+      result.sort(
+        (a, b) => Number(b.price) - Number(a.price)
+      );
+    }
+
+    if (sort === "name") {
+      result.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+    }
+
+    if (sort === "featured") {
+      result.sort(
+        (a, b) =>
+          Number(b.is_featured) - Number(a.is_featured)
+      );
+    }
 
     return result;
   }, [products, search, category, sort]);
@@ -65,9 +90,12 @@ export default function ProductCatalog({ products, categories }) {
           <span>Category</span>
           <select
             value={category}
-            onChange={(event) => setCategory(event.target.value)}
+            onChange={(event) =>
+              setCategory(event.target.value)
+            }
           >
             <option value="all">All categories</option>
+
             {categories.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
@@ -80,11 +108,17 @@ export default function ProductCatalog({ products, categories }) {
           <span>Sort by</span>
           <select
             value={sort}
-            onChange={(event) => setSort(event.target.value)}
+            onChange={(event) =>
+              setSort(event.target.value)
+            }
           >
             <option value="featured">Featured first</option>
-            <option value="price-low">Price: low to high</option>
-            <option value="price-high">Price: high to low</option>
+            <option value="price-low">
+              Price: low to high
+            </option>
+            <option value="price-high">
+              Price: high to low
+            </option>
             <option value="name">Name: A to Z</option>
           </select>
         </label>
@@ -119,7 +153,6 @@ export default function ProductCatalog({ products, categories }) {
                 href={`/products/${product.slug}`}
               >
                 {product.image?.url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={product.image.url}
                     alt={product.image.alt}
@@ -141,13 +174,16 @@ export default function ProductCatalog({ products, categories }) {
                 )}
 
                 {product.is_featured && (
-                  <span className="product-featured">Featured</span>
+                  <span className="product-featured">
+                    Featured
+                  </span>
                 )}
               </Link>
 
               <div className="product-card-body">
                 <div className="product-card-category">
-                  {product.categoryNames.join(" · ") || "OnionFrys"}
+                  {product.categoryNames.join(" · ") ||
+                    "OnionFrys"}
                 </div>
 
                 <Link
@@ -165,7 +201,10 @@ export default function ProductCatalog({ products, categories }) {
                 <div className="product-card-bottom">
                   <div>
                     <strong>
-                      {formatPrice(product.price, product.currency)}
+                      {formatPrice(
+                        product.price,
+                        product.currency
+                      )}
                     </strong>
 
                     {product.compare_at_price &&
@@ -197,7 +236,9 @@ export default function ProductCatalog({ products, categories }) {
         <div className="catalog-empty">
           <span>🥔</span>
           <h2>No products found</h2>
-          <p>Try another search or clear your filters.</p>
+          <p>
+            Try another search or clear your filters.
+          </p>
         </div>
       )}
     </>
