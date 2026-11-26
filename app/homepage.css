@@ -1,5 +1,29 @@
 
-/* Homepage header — desktop */
+/* ========================================
+   ONIONFRYS HOMEPAGE
+======================================== */
+
+.home-storefront {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #fff;
+  color: #20251b;
+}
+
+.home-container {
+  width: min(88%, 1320px);
+  margin-inline: auto;
+}
+
+.home-storefront .topbar {
+  width: 100%;
+}
+
+/* ========================================
+   HEADER
+======================================== */
+
 .home-storefront > .topbar {
   width: 100%;
   min-height: 76px;
@@ -24,8 +48,377 @@
   gap: 12px 26px;
 }
 
-/* Homepage header — mobile */
+/* ========================================
+   PROMOTION BANNER
+======================================== */
+
+.home-promo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 480px;
+  margin: 34px 0 90px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #e9f0df;
+  color: #20251b;
+}
+
+.home-promo-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(35px, 6vw, 85px);
+}
+
+.home-promo-eyebrow,
+.home-section-eyebrow {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.home-promo-content h1 {
+  margin: 0;
+  font-size: clamp(48px, 6vw, 82px);
+  line-height: 0.98;
+  letter-spacing: -5px;
+  font-weight: 800;
+}
+
+.home-promo-content h1 em {
+  font-family: Georgia, serif;
+  font-weight: 400;
+}
+
+.home-promo-content > p {
+  max-width: 390px;
+  margin: 25px 0;
+  color: #656c5d;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.home-promo-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 25px;
+  padding: 15px 22px;
+  background: #20251b;
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.home-promo-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 35px;
+  font-size: 12px;
+}
+
+.home-promo-controls button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.home-promo-image {
+  position: relative;
+  display: grid;
+  min-height: 400px;
+  place-items: center;
+  overflow: hidden;
+  background: #cbd9bc;
+  color: #20251b;
+  text-decoration: none;
+}
+
+.home-promo-image img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+}
+
+.home-promo-image-placeholder {
+  font-size: clamp(35px, 5vw, 65px);
+  font-weight: 900;
+  letter-spacing: -4px;
+}
+
+.home-promo-image-label {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  z-index: 1;
+  padding: 10px 14px;
+  background: #fff;
+  color: #20251b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+/* ========================================
+   HOMEPAGE SECTIONS
+======================================== */
+
+.home-section {
+  margin: 0 0 90px;
+}
+
+.home-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.home-section-heading h2 {
+  margin: 0;
+  font-size: clamp(30px, 4vw, 48px);
+  letter-spacing: -2px;
+}
+
+.home-section-heading > a {
+  color: #20251b;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.home-section-eyebrow {
+  margin-bottom: 12px;
+  color: #73796f;
+}
+
+/* ========================================
+   CATEGORIES
+======================================== */
+
+.home-category-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.home-category-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 90px;
+  padding: 22px;
+  border: 1px solid #e5e7df;
+  color: #20251b;
+  font-size: 17px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.home-category-link:hover {
+  background: #e9f0df;
+}
+
+/* ========================================
+   PRODUCT CARDS
+======================================== */
+
+.home-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.home-product-card {
+  min-width: 0;
+  color: #20251b;
+  text-decoration: none;
+}
+
+.home-product-image {
+  position: relative;
+  display: grid;
+  aspect-ratio: 4 / 5;
+  place-items: center;
+  overflow: hidden;
+  background: #f0f1eb;
+  color: #9ba18e;
+}
+
+.home-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-product-image > span:not(.home-product-badge) {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -2px;
+}
+
+.home-product-badge {
+  position: absolute;
+  top: 13px;
+  left: 13px;
+  padding: 8px 11px;
+  background: #b9f36a;
+  color: #20251b;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.home-product-info {
+  padding: 16px 0;
+}
+
+.home-product-info h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.home-product-prices {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.home-product-prices strong {
+  font-weight: 800;
+}
+
+.home-product-prices del {
+  color: #92978c;
+}
+
+.home-product-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ========================================
+   BOTTOM PROMOTION
+======================================== */
+
+.home-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  margin: 0 0 90px;
+  padding: 45px 20px;
+  background: #e9f0df;
+  text-align: center;
+}
+
+.home-more > span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.home-more h2 {
+  max-width: 600px;
+  margin: 20px 0;
+  font-size: clamp(32px, 5vw, 55px);
+  letter-spacing: -3px;
+}
+
+.home-more a {
+  color: #20251b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+
+.home-footer {
+  width: 100%;
+  padding: 55px 0 25px;
+  border-top: 1px solid #e5e7df;
+}
+
+.home-footer-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 35px;
+  padding-bottom: 45px;
+}
+
+.home-footer-brand {
+  color: #20251b;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  text-decoration: none;
+}
+
+.home-footer-brand span {
+  color: #849d67;
+}
+
+.home-footer-main p {
+  color: #73796f;
+  font-size: 13px;
+}
+
+.home-footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.home-footer-column h3 {
+  margin: 0 0 5px;
+  font-size: 13px;
+}
+
+.home-footer-column a {
+  color: #73796f;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.home-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 22px;
+  border-top: 1px solid #e5e7df;
+  color: #73796f;
+  font-size: 11px;
+}
+
+/* ========================================
+   MOBILE RESPONSIVE
+======================================== */
+
 @media (max-width: 760px) {
+  .home-container {
+    width: 90%;
+  }
+
   .home-storefront > .topbar {
     min-height: 108px;
     padding: 14px 5%;
@@ -52,11 +445,80 @@
   .home-storefront > .topbar .nav .nav-cta {
     padding: 9px 14px;
   }
+
+  .home-promo {
+    grid-template-columns: 1fr;
+    margin: 25px 0 65px;
+  }
+
+  .home-promo-content {
+    padding: 40px 28px;
+  }
+
+  .home-promo-content h1 {
+    font-size: clamp(48px, 12vw, 70px);
+    letter-spacing: -3px;
+  }
+
+  .home-promo-image {
+    min-height: 280px;
+    grid-row: 1;
+  }
+
+  .home-section {
+    margin-bottom: 65px;
+  }
+
+  .home-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-category-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .home-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 14px;
+  }
+
+  .home-more {
+    min-height: 250px;
+    margin-bottom: 65px;
+  }
+
+  .home-footer-main {
+    grid-template-columns: 1fr 1fr;
+    gap: 30px 15px;
+  }
+
+  .home-footer-main > div:first-child {
+    grid-column: 1 / -1;
+  }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 420px) {
   .home-storefront > .topbar .nav {
     gap: 8px 12px;
     font-size: 11px;
+  }
+
+  .home-category-list {
+    grid-template-columns: 1fr;
+  }
+
+  .home-footer-main {
+    grid-template-columns: 1fr;
+  }
+
+  .home-footer-main > div:first-child {
+    grid-column: auto;
+  }
+
+  .home-footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
   }
 }
