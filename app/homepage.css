@@ -522,3 +522,90 @@
     gap: 10px;
   }
 }
+
+
+
+/* Promotion banner themes */
+
+.home-promo {
+  transition: background 0.3s ease;
+}
+
+.home-promo.promo-green {
+  background: #e9f0df;
+  color: #20251b;
+}
+
+.home-promo.promo-cream {
+  background: #f1e9dc;
+  color: #30271f;
+}
+
+.home-promo.promo-dark {
+  background: #20251b;
+  color: #fff;
+}
+
+.home-promo.promo-dark .home-promo-content > p {
+  color: #d0d4c9;
+}
+
+.home-promo.promo-dark .home-promo-button {
+  background: #fff;
+  color: #20251b;
+}
+
+.home-promo-art {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 45%, #c9e3a7 0 18%, transparent 18.5%),
+    linear-gradient(145deg, #d9e6c8, #a8bf8c);
+}
+
+.promo-cream .home-promo-art {
+  background:
+    radial-gradient(circle at 50% 45%, #e6c9a6 0 18%, transparent 18.5%),
+    linear-gradient(145deg, #ead8c1, #c7a982);
+}
+
+.promo-dark .home-promo-art {
+  background:
+    radial-gradient(circle at 50% 45%, #526d43 0 18%, transparent 18.5%),
+    linear-gradient(145deg, #354c35, #17251a);
+}
+
+.promo-art-circle {
+  width: min(65%, 290px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(32, 37, 27, 0.35);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transform: rotate(-10deg);
+  font-size: clamp(32px, 5vw, 60px);
+  font-weight: 900;
+  letter-spacing: -4px;
+  color: #20251b;
+}
+
+.promo-dark .promo-art-circle {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.promo-art-circle strong {
+  font-size: 1.25em;
+}
+
+@media (max-width: 760px) {
+  .home-promo-art {
+    min-height: 260px;
+  }
+
+  .promo-art-circle {
+    width: 190px;
+  }
+}
