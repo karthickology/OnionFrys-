@@ -894,44 +894,15 @@
 
 /* Footer refinement */
 
+/* Center footer content */
+
 .home-footer-main {
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 40px;
-}
-
-.home-footer-brand-section p {
-  margin-top: 14px;
-  color: #73796f;
-  font-size: 14px;
-  line-height: 1.7;
-}
-
-.home-footer-column a {
-  transition: color 0.2s ease;
-}
-
-.home-footer-column a:hover {
-  color: #203b26;
+  text-align: center;
+  justify-items: center;
 }
 
 .home-footer-bottom {
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 760px) {
-  .home-footer-main {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 30px 20px;
-  }
-
-  .home-footer-brand-section {
-    grid-column: 1 / -1;
-  }
-
-  .home-footer-bottom {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  justify-content: center;
+  text-align: center;
 }
 
