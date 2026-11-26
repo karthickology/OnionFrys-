@@ -836,3 +836,56 @@
     gap: 10px;
   }
 }
+
+
+
+/* Category tile improvements */
+
+.home-category-link {
+  position: relative;
+  min-height: 110px;
+  padding: 22px;
+  background: #f3f5ef;
+  border: 1px solid #e5e7df;
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.home-category-link:hover {
+  background: #e9f0df;
+  border-color: #b9c9a7;
+  transform: translateY(-4px);
+}
+
+.home-category-name {
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.home-category-arrow {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid #cbd3c1;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+}
+
+.home-category-link:hover .home-category-arrow {
+  transform: rotate(45deg);
+}
+
+@media (max-width: 760px) {
+  .home-category-link {
+    min-height: 85px;
+    padding: 16px;
+  }
+
+  .home-category-name {
+    font-size: 14px;
+  }
+}
+
