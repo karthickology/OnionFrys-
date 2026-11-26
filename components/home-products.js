@@ -2,9 +2,13 @@
 import Link from "next/link";
 
 function ProductCard({ product }) {
+  const price = Number(product.price);
+  const comparePrice = Number(product.compare_at_price);
+
   const hasDiscount =
-    product.compare_at_price &&
-    Number(product.compare_at_price) > Number(product.price);
+    product.compare_at_price != null &&
+    Number.isFinite(comparePrice) &&
+    comparePrice > price;
 
   return (
     <Link
@@ -18,12 +22,25 @@ function ProductCard({ product }) {
             alt={product.image.alt || product.name}
           />
         ) : (
-          <span>onionfrys.</span>
+          <div className="home-product-placeholder">
+            <span className="home-product-placeholder-mark">
+              onion<span>frys.</span>
+            </span>
+            <span className="home-product-placeholder-caption">
+              SOMETHING DIFFERENT
+            </span>
+          </div>
         )}
 
         {hasDiscount && (
-          <span className="home-product-badge">Special price</span>
+          <span className="home-product-badge">
+            Special price
+          </span>
         )}
+
+        <span className="home-product-quick-view">
+          View product →
+        </span>
       </div>
 
       <div className="home-product-info">
@@ -31,24 +48,24 @@ function ProductCard({ product }) {
 
         <div className="home-product-prices">
           <strong>
-            {product.currency || "USD"} {Number(product.price).toFixed(2)}
+            {product.currency || "USD"} {price.toFixed(2)}
           </strong>
 
           {hasDiscount && (
             <del>
-              {product.currency || "USD"}{" "}
-              {Number(product.compare_at_price).toFixed(2)}
+              {product.currency || "USD"} {comparePrice.toFixed(2)}
             </del>
           )}
         </div>
-
-        <span className="home-product-link">View product →</span>
       </div>
     </Link>
   );
 }
 
-export default function HomeProducts({ products = [], categories = [] }) {
+export default function HomeProducts({
+  products = [],
+  categories = [],
+}) {
   if (products.length === 0) {
     return (
       <section className="home-section">
@@ -75,6 +92,7 @@ export default function HomeProducts({ products = [], categories = [] }) {
               <span className="home-section-eyebrow">EXPLORE</span>
               <h2>Shop by category.</h2>
             </div>
+
             <Link href="/products">All products →</Link>
           </div>
 
@@ -96,7 +114,9 @@ export default function HomeProducts({ products = [], categories = [] }) {
       <section className="home-section">
         <div className="home-section-heading">
           <div>
-            <span className="home-section-eyebrow">HANDPICKED FOR YOU</span>
+            <span className="home-section-eyebrow">
+              HANDPICKED FOR YOU
+            </span>
             <h2>Featured finds.</h2>
           </div>
 
