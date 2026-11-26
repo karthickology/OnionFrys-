@@ -4,68 +4,78 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+const promotions = [
+  {
+    eyebrow: "WELCOME TO ONIONFRYS",
+    heading: "Good things.",
+    accent: "Odd energy.",
+    description:
+      "Discover something different. Find your next favourite.",
+    button: "Explore the collection",
+    label: "THE ONIONFRYS COLLECTION",
+    theme: "promo-green",
+  },
+  {
+    eyebrow: "FRESH FINDS",
+    heading: "Find your",
+    accent: "next thing.",
+    description:
+      "Interesting finds for everyday life. Explore the collection.",
+    button: "Discover the store",
+    label: "FIND SOMETHING DIFFERENT",
+    theme: "promo-cream",
+  },
+  {
+    eyebrow: "MADE TO STAND OUT",
+    heading: "Not your",
+    accent: "usual store.",
+    description:
+      "Explore products with a little more personality.",
+    button: "Shop all products",
+    label: "GOOD THINGS. ODD ENERGY.",
+    theme: "promo-dark",
+  },
+];
+
 export default function HomePromotions({ products = [] }) {
-  const promotionProducts = products.slice(0, 3);
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    if (promotionProducts.length < 2) return;
-
     const timer = setInterval(() => {
-      setActive((current) => (current + 1) % promotionProducts.length);
+      setActive((current) => (current + 1) % promotions.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [promotionProducts.length]);
+  }, []);
 
-  if (promotionProducts.length === 0) return null;
+  const promotion = promotions[active];
+  const featuredProduct = products[0];
 
-  const product = promotionProducts[active];
-
-  const messages = [
-    {
-      eyebrow: "THE ONIONFRYS COLLECTION",
-      heading: "Good things.",
-      accent: "Odd energy.",
-      description: "Discover something different. Find your next favourite.",
-      button: "Explore this product",
-    },
-    {
-      eyebrow: "FRESH FINDS",
-      heading: "Find your",
-      accent: "next thing.",
-      description: "Interesting finds for everyday life.",
-      button: "Discover this product",
-    },
-    {
-      eyebrow: "MADE TO STAND OUT",
-      heading: "Not your",
-      accent: "usual store.",
-      description: "Explore products with a little more personality.",
-      button: "Shop this product",
-    },
-  ];
-
-  const message = messages[active % messages.length];
+  const destination = featuredProduct
+    ? `/products/${featuredProduct.slug}`
+    : "/products";
 
   return (
-    <section className="home-promo" aria-label="Featured promotions">
+    <section
+      className={`home-promo ${promotion.theme}`}
+      aria-label="OnionFrys promotions"
+    >
       <div className="home-promo-content">
-        <span className="home-promo-eyebrow">{message.eyebrow}</span>
+        <span className="home-promo-eyebrow">
+          {promotion.eyebrow}
+        </span>
 
         <h1>
-          {message.heading}
+          {promotion.heading}
           <br />
-          <em>{message.accent}</em>
+          <em>{promotion.accent}</em>
         </h1>
 
-        <p>{message.description}</p>
+        <p>{promotion.description}</p>
 
-        <Link
-          className="home-promo-button"
-          href={`/products/${product.slug}`}
-        >
-          {message.button} <span aria-hidden="true">→</span>
+        <Link className="home-promo-button" href={destination}>
+          {promotion.button}
+          <span aria-hidden="true">→</span>
         </Link>
 
         <div className="home-promo-controls">
@@ -73,9 +83,9 @@ export default function HomePromotions({ products = [] }) {
             type="button"
             aria-label="Previous promotion"
             onClick={() =>
-              setActive((current) =>
-                (current - 1 + promotionProducts.length) %
-                promotionProducts.length
+              setActive(
+                (current) =>
+                  (current - 1 + promotions.length) % promotions.length
               )
             }
           >
@@ -83,16 +93,14 @@ export default function HomePromotions({ products = [] }) {
           </button>
 
           <span>
-            {active + 1} / {promotionProducts.length}
+            {active + 1} / {promotions.length}
           </span>
 
           <button
             type="button"
             aria-label="Next promotion"
             onClick={() =>
-              setActive((current) =>
-                (current + 1) % promotionProducts.length
-              )
+              setActive((current) => (current + 1) % promotions.length)
             }
           >
             →
@@ -101,20 +109,17 @@ export default function HomePromotions({ products = [] }) {
       </div>
 
       <Link
-        href={`/products/${product.slug}`}
-        className="home-promo-image"
-        aria-label={`View ${product.name}`}
+        href={destination}
+        className="home-promo-image home-promo-art"
+        aria-label="Explore the OnionFrys collection"
       >
-        {product.image?.url ? (
-          <img src={product.image.url} alt={product.image.alt || product.name} />
-        ) : (
-          <div className="home-promo-image-placeholder">
-            onionfrys.
-          </div>
-        )}
+        <div className="promo-art-circle">
+          <span>onion</span>
+          <strong>frys.</strong>
+        </div>
 
         <span className="home-promo-image-label">
-          FEATURED FIND
+          {promotion.label}
         </span>
       </Link>
     </section>
