@@ -1,16 +1,23 @@
+
 import Link from "next/link";
 import ProductCatalog from "@/components/product-catalog";
 import { getCatalogue } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProductsPage() {
+export default async function ProductsPage({ searchParams }) {
+  const params = await searchParams;
+  const selectedCategory = params?.category || "";
+
   const { products, categories, error } = await getCatalogue();
 
   return (
     <main className="catalog-page">
       <header className="catalog-topbar">
-        <Link className="catalog-brand" href="/">onion<span>frys.</span></Link>
+        <Link className="catalog-brand" href="/">
+          onion<span>frys.</span>
+        </Link>
+
         <nav>
           <Link href="/">Home</Link>
           <Link href="/account">My account</Link>
@@ -18,9 +25,18 @@ export default async function ProductsPage() {
       </header>
 
       <section className="catalog-intro">
-        <div className="catalog-eyebrow">THE ONIONFRYS COLLECTION</div>
-        <h1>Find your <em>next thing.</em></h1>
-        <p>Useful things, odd things, and a few things you didn't know you needed.</p>
+        <div className="catalog-eyebrow">
+          THE ONIONFRYS COLLECTION
+        </div>
+
+        <h1>
+          Find your <em>next thing.</em>
+        </h1>
+
+        <p>
+          Useful things, odd things, and a few things you didn't
+          know you needed.
+        </p>
       </section>
 
       <section className="catalog-content">
@@ -33,10 +49,17 @@ export default async function ProductsPage() {
           <div className="catalog-empty">
             <span>🛍️</span>
             <h2>The shelves are empty.</h2>
-            <p>There are no published products yet. Add products in the database and publish them to show them here.</p>
+            <p>
+              There are no published products yet. Add products
+              in the database and publish them to show them here.
+            </p>
           </div>
         ) : (
-          <ProductCatalog products={products} categories={categories} />
+          <ProductCatalog
+            products={products}
+            categories={categories}
+            initialCategory={selectedCategory}
+          />
         )}
       </section>
 
