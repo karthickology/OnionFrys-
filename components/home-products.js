@@ -66,15 +66,6 @@ export default function HomeProducts({
   products = [],
   categories = [],
 }) {
-  if (products.length === 0) {
-    return (
-      <section className="home-section">
-        <h2>Our collection</h2>
-        <p>New products are coming soon.</p>
-      </section>
-    );
-  }
-
   const featuredProducts = products.filter(
     (product) => product.is_featured
   );
@@ -85,15 +76,20 @@ export default function HomeProducts({
 
   return (
     <>
+      {/* Categories */}
       {categories.length > 0 && (
         <section className="home-section">
           <div className="home-section-heading">
             <div>
-              <span className="home-section-eyebrow">EXPLORE</span>
+              <span className="home-section-eyebrow">
+                EXPLORE
+              </span>
               <h2>Shop by category.</h2>
             </div>
 
-            <Link href="/products">All products →</Link>
+            <Link href="/products">
+              All products →
+            </Link>
           </div>
 
           <div className="home-category-list">
@@ -103,14 +99,20 @@ export default function HomeProducts({
                 href={`/products?category=${encodeURIComponent(category.slug)}`}
                 className="home-category-link"
               >
-                {category.name}
-                <span>↗</span>
+                <span className="home-category-name">
+                  {category.name}
+                </span>
+
+                <span className="home-category-arrow" aria-hidden="true">
+                  ↗
+                </span>
               </Link>
             ))}
           </div>
         </section>
       )}
 
+      {/* Featured products */}
       <section className="home-section">
         <div className="home-section-heading">
           <div>
@@ -120,20 +122,32 @@ export default function HomeProducts({
             <h2>Featured finds.</h2>
           </div>
 
-          <Link href="/products">Explore the store →</Link>
+          <Link href="/products">
+            Explore the store →
+          </Link>
         </div>
 
-        <div className="home-product-grid">
-          {displayedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {displayedProducts.length > 0 ? (
+          <div className="home-product-grid">
+            {displayedProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+              />
+            ))}
+          </div>
+        ) : (
+          <p>New products are coming soon.</p>
+        )}
       </section>
 
+      {/* Bottom promotion */}
       <section className="home-more">
         <span>GOOD THINGS. ODD ENERGY.</span>
         <h2>Your next favourite might be here.</h2>
-        <Link href="/products">Explore all products →</Link>
+        <Link href="/products">
+          Explore all products →
+        </Link>
       </section>
     </>
   );
