@@ -1,7 +1,10 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProductBySlug } from "@/lib/catalog";
+import {
+  getProductBySlug,
+  getRelatedProducts,
+} from "@/lib/catalog";
 import { formatPrice } from "@/lib/format-price";
 import {
   AddToCartButton,
@@ -17,6 +20,8 @@ export default async function ProductDetailPage({ params }) {
   const product = await getProductBySlug(slug);
 
   if (!product) notFound();
+
+  const relatedProducts = await getRelatedProducts(product.id);
 
   const inStock = product.stock !== null && product.stock > 0;
 
@@ -56,7 +61,6 @@ export default async function ProductDetailPage({ params }) {
         <section className="product-detail">
           <div className="product-detail-image">
             {product.image?.url ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={product.image.url}
                 alt={product.image.alt || product.name}
@@ -174,6 +178,84 @@ export default async function ProductDetailPage({ params }) {
             </Link>
           </div>
         </section>
+
+        {/* Related products */}
+        {relatedProducts.length > 0 && (
+          <section className="related-products-section">
+            <div className="related-products-heading">
+              <span className="catalog-eyebrow">
+                YOU MIGHT ALSO LIKE
+              </span>
+              <h2>Related products.</h2>
+              <p>More things worth exploring.</p>
+            </div>
+
+            <div className="product-grid">
+              {relatedProducts.map((relatedProduct) => (
+                <article
+                  className="product-card"
+                  key={relatedProduct.id}
+                >
+                  <Link
+                    className="product-image-wrap"
+                    href={`/products/${relatedProduct.slug}`}
+                  >
+                    {relatedProduct.image?.url ? (
+                      <img
+                        src={relatedProduct.image.url}
+                        alt={
+                          relatedProduct.image.alt ||
+                          relatedProduct.name
+                        }
+                      />
+                    ) : (
+                      <div className="product-image-placeholder">
+                        <span>🛍️</span>
+                        <small>ONIONFRYS OBJECT</small>
+                      </div>
+                    )}
+
+                    {relatedProduct.is_featured && (
+                      <span className="product-featured">
+                        Featured
+                      </span>
+                    )}
+                  </Link>
+
+                  <div className="product-card-body">
+                    <div className="product-card-category">
+                      {relatedProduct.categoryNames.join(" · ") ||
+                        "OnionFrys"}
+                    </div>
+
+                    <Link
+                      href={`/products/${relatedProduct.slug}`}
+                      className="product-card-title"
+                    >
+                      {relatedProduct.name}
+                    </Link>
+
+                    <div className="product-card-bottom">
+                      <strong>
+                        {formatPrice(
+                          relatedProduct.price,
+                          relatedProduct.currency
+                        )}
+                      </strong>
+
+                      <Link
+                        className="product-view-link"
+                        href={`/products/${relatedProduct.slug}`}
+                      >
+                        View item ↗
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       <footer className="catalog-footer">
