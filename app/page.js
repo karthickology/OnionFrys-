@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const supabase = await createClient();
+
   let user = null;
 
   if (supabase) {
@@ -21,14 +22,14 @@ export default async function HomePage() {
   const { products, categories } = await getCatalogue();
 
   return (
-    <main className="site-shell">
+    <main className="site-shell home-storefront">
       <header className="topbar">
         <Link className="brand" href="/">
-          onion<span>frys.</span>
+          onion<span>frys</span>.
         </Link>
 
         <nav className="nav">
-          <Link href="/products">Explore</Link>
+          <Link href="/products">Shop</Link>
           <Link href="/cart">Cart</Link>
 
           {user ? (
@@ -49,14 +50,14 @@ export default async function HomePage() {
         </nav>
       </header>
 
-      <HomePromotions products={products} />
-
-      <HomeProducts
-        products={products}
-        categories={categories}
-      />
-
-      <SiteFooter />
+      <div className="home-container">
+        <HomePromotions products={products} />
+        <HomeProducts
+          products={products}
+          categories={categories}
+        />
+        <SiteFooter />
+      </div>
     </main>
   );
 }
