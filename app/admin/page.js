@@ -8,6 +8,13 @@ import AdminCustomers from "@/components/admin-customers";
 
 export const dynamic = "force-dynamic";
 
+function formatCurrency(value, currency = "AED") {
+  return new Intl.NumberFormat("en-AE", {
+    style: "currency",
+    currency: currency || "AED",
+  }).format(Number(value) || 0);
+}
+
 export default async function AdminPage() {
   const supabase = await createClient();
 
@@ -138,11 +145,26 @@ export default async function AdminPage() {
       .eq("details->>email_sent", "false"),
   ]);
 
-  const activeCarts = (carts || []).filter(
+  const allOrders = orders || [];
+  const allCarts = carts || [];
+
+  const paidOrders = allOrders.filter(
+    (order) => order.payment_status === "paid"
+  );
+
+  const paidRevenueByCurrency = paidOrders.reduce((totals, order) => {
+    const currency = order.currency || "AED";
+    totals[currency] = (totals[currency] || 0) + Number(order.total || 0);
+    return totals;
+  }, {});
+
+  const revenueDisplay = Object.entries(paidRevenueByCurrency);
+
+  const activeCarts = allCarts.filter(
     (cart) => cart.status === "active"
   ).length;
 
-  const abandonedCarts = (carts || []).filter(
+  const abandonedCarts = allCarts.filter(
     (cart) => cart.status === "abandoned"
   ).length;
 
@@ -170,135 +192,212 @@ export default async function AdminPage() {
   ];
 
   return (
-    <section className="admin-wrap">
-      <div className="eyebrow">
-        STORE OVERVIEW / OPERATIONS
-      </div>
-
-      <h1 className="admin-title">Dashboard</h1>
-
-      <p className="muted">
-        Welcome back. Here's what's happening in your store.
-      </p>
-
-      <div className="admin-card">
-        <h2>Order management</h2>
-        <p className="muted">
-          Manage customer orders and fulfilment status.
-        </p>
-        <p>
-          <strong>Total orders:</strong> {orders?.length || 0}
-        </p>
-      </div>
-
-      {ordersError ? (
-        <div className="admin-card">
-          <p>Unable to load orders: {ordersError.message}</p>
-        </div>
-      ) : (
-        <AdminOrders initialOrders={orders || []} />
-      )}
-
-      {customersError ? (
-        <div className="admin-card">
-          <p>
-            Unable to load customers: {customersError.message}
+    <main className="admin-products-page">
+      <div className="admin-page-heading">
+        <div>
+          <div className="eyebrow">STORE OVERVIEW / OPERATIONS</div>
+          <h1 className="admin-title">Dashboard</h1>
+          <p className="muted">
+            Monitor store performance, orders, customers and retention activity.
           </p>
         </div>
-      ) : (
-        <AdminCustomers
-          initialCustomers={customers || []}
-          initialOrders={orders || []}
-        />
-      )}
 
-      <section className="admin-card">
-        <h2>CRM automation & retention</h2>
-        <p className="muted">
-          Monitor customer activity and retention campaigns.
-        </p>
+        <Link href="/" className="button secondary">
+          View storefront ↗
+        </Link>
+      </div>
 
-        <h3>Customer cart overview</h3>
+      {/* STORE PERFORMANCE */}
+      <section className="admin-product-stats">
+        <div className="admin-stat-card">
+          <span>Orders loaded</span>
+          <strong>{allOrders.length}</strong>
+          <small>Latest 100 orders</small>
+        </div>
 
-        {cartsError ? (
-          <p>Unable to load carts: {cartsError.message}</p>
+        <div className="admin-stat-card">
+          <span>Paid orders</span>
+          <strong>{paidOrders.length}</strong>
+          <small>Successfully paid orders</small>
+        </div>
+
+        <div className="admin-stat-card">
+          <span>Active carts</span>
+          <strong>{activeCarts}</strong>
+          <small>Currently active carts</small>
+        </div>
+
+        <div className="admin-stat-card">
+          <span>Abandoned carts</span>
+          <strong>{abandonedCarts}</strong>
+          <small>Currently abandoned carts</small>
+        </div>
+      </section>
+
+      {/* REVENUE */}
+      <section className="admin-panel">
+        <div className="admin-panel-heading">
+          <div>
+            <h2>Paid order value</h2>
+            <p className="muted">
+              Revenue from paid orders in the latest 100 orders loaded.
+            </p>
+          </div>
+        </div>
+
+        {revenueDisplay.length === 0 ? (
+          <p className="muted">No paid orders recorded yet.</p>
         ) : (
-          <div className="admin-stats">
-            <div>
-              <h3>{activeCarts}</h3>
-              <p className="muted">Active carts</p>
-            </div>
-            <div>
-              <h3>{abandonedCarts}</h3>
-              <p className="muted">Currently abandoned carts</p>
-            </div>
+          <div className="admin-product-stats">
+            {revenueDisplay.map(([currency, total]) => (
+              <div className="admin-stat-card" key={currency}>
+                <span>{currency} revenue</span>
+                <strong>{formatCurrency(total, currency)}</strong>
+                <small>Paid orders only</small>
+              </div>
+            ))}
           </div>
         )}
+      </section>
 
-        <h3>Campaign performance</h3>
+      {/* ORDERS */}
+      <section className="admin-panel">
+        <div className="admin-panel-heading">
+          <div>
+            <h2>Order management</h2>
+            <p className="muted">
+              Review customer orders and manage their status.
+            </p>
+          </div>
+          <span className="admin-result-count">
+            {allOrders.length} loaded
+          </span>
+        </div>
 
-        <div className="admin-stats">
+        {ordersError ? (
+          <p>Unable to load orders: {ordersError.message}</p>
+        ) : (
+          <AdminOrders initialOrders={allOrders} />
+        )}
+      </section>
+
+      {/* CUSTOMERS */}
+      <section className="admin-panel">
+        <div className="admin-panel-heading">
+          <div>
+            <h2>Customer management</h2>
+            <p className="muted">
+              Review customer information and purchase activity.
+            </p>
+          </div>
+        </div>
+
+        {customersError ? (
+          <p>Unable to load customers: {customersError.message}</p>
+        ) : (
+          <AdminCustomers
+            initialCustomers={customers || []}
+            initialOrders={allOrders}
+          />
+        )}
+      </section>
+
+      {/* CRM AUTOMATION */}
+      <section className="admin-panel">
+        <div className="admin-panel-heading">
+          <div>
+            <div className="eyebrow">CUSTOMER RETENTION</div>
+            <h2>CRM automation</h2>
+            <p className="muted">
+              Monitor abandoned carts and post-purchase campaigns.
+            </p>
+          </div>
+          <span className="admin-status-pill published">
+            Simulation mode
+          </span>
+        </div>
+
+        <div className="admin-product-stats">
           {campaignMetrics.map((metric) => (
-            <div key={metric.label}>
-              <h3>{metric.value}</h3>
-              <p className="muted">{metric.label}</p>
+            <div className="admin-stat-card" key={metric.label}>
+              <span>{metric.label}</span>
+              <strong>{metric.value}</strong>
             </div>
           ))}
         </div>
 
         <p className="muted">
-          Campaign delivery mode: Simulation. No real emails are sent.
+          Campaign delivery is simulated. No real emails are sent.
         </p>
-
-        <h3>Recent customer carts</h3>
-
-        {cartsError ? (
-          <p className="muted">Cart information unavailable.</p>
-        ) : !carts?.length ? (
-          <p className="muted">No customer carts found.</p>
-        ) : (
-          carts.map((cart) => (
-            <div key={cart.id}>
-              <p>
-                <strong>{cart.email || cart.user_id}</strong>
-              </p>
-              <p className="muted">
-                Status: {cart.status} · Products:{" "}
-                {Array.isArray(cart.items)
-                  ? cart.items.length
-                  : 0}
-              </p>
-              <p className="muted">
-                Last activity:{" "}
-                {new Date(cart.last_activity_at).toLocaleString()}
-              </p>
-            </div>
-          ))
-        )}
-
-        <h3>Recent automation activity</h3>
-
-        {logsError ? (
-          <p>Unable to load logs: {logsError.message}</p>
-        ) : !automationLogs?.length ? (
-          <p className="muted">
-            No automation executions recorded yet.
-          </p>
-        ) : (
-          automationLogs.map((log) => (
-            <div key={log.id}>
-              <p>
-                <strong>{log.automation_type}</strong>
-                {" — "}
-                {log.status}
-              </p>
-              <p className="muted">
-                {new Date(log.executed_at).toLocaleString()}
-              </p>
-            </div>
-          ))
-        )}
       </section>
-    </section>
+
+      {/* RECENT ACTIVITY */}
+      <div className="admin-product-stats">
+        <section className="admin-panel">
+          <div className="admin-panel-heading">
+            <div>
+              <h2>Recent customer carts</h2>
+              <p className="muted">Latest cart activity.</p>
+            </div>
+          </div>
+
+          {cartsError ? (
+            <p className="muted">Cart information unavailable.</p>
+          ) : !allCarts.length ? (
+            <p className="muted">No customer carts found.</p>
+          ) : (
+            allCarts.slice(0, 8).map((cart) => (
+              <div key={cart.id}>
+                <p>
+                  <strong>{cart.email || cart.user_id}</strong>
+                </p>
+                <p className="muted">
+                  {cart.status} ·{" "}
+                  {Array.isArray(cart.items) ? cart.items.length : 0} products
+                </p>
+                <p className="muted">
+                  {cart.last_activity_at
+                    ? new Date(cart.last_activity_at).toLocaleString()
+                    : "Activity time unavailable"}
+                </p>
+                <hr />
+              </div>
+            ))
+          )}
+        </section>
+
+        <section className="admin-panel">
+          <div className="admin-panel-heading">
+            <div>
+              <h2>Automation activity</h2>
+              <p className="muted">Latest campaign executions.</p>
+            </div>
+          </div>
+
+          {logsError ? (
+            <p>Unable to load logs: {logsError.message}</p>
+          ) : !automationLogs?.length ? (
+            <p className="muted">
+              No automation executions recorded yet.
+            </p>
+          ) : (
+            automationLogs.slice(0, 8).map((log) => (
+              <div key={log.id}>
+                <p>
+                  <strong>{log.automation_type}</strong>
+                </p>
+                <p className="muted">
+                  {log.status} ·{" "}
+                  {log.executed_at
+                    ? new Date(log.executed_at).toLocaleString()
+                    : "Time unavailable"}
+                </p>
+                <hr />
+              </div>
+            ))
+          )}
+        </section>
+      </div>
+    </main>
   );
 }
