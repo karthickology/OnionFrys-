@@ -1197,3 +1197,190 @@ button, a { -webkit-tap-highlight-color: transparent; }
   }
 }
 
+
+
+/* ADMIN CUSTOMER CRM */
+
+.admin-customers {
+  width: 100%;
+}
+
+.admin-customer-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-customer-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e8eae6;
+}
+
+.admin-customer-tab {
+  border: 1px solid #e5e8e3;
+  background: #fff;
+  color: #60665e;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.admin-customer-tab span {
+  margin-left: 7px;
+  color: #92988f;
+}
+
+.admin-customer-tab.active {
+  background: #203b26;
+  color: #fff;
+  border-color: #203b26;
+}
+
+.admin-customer-tab.active span {
+  color: #d7e8d5;
+}
+
+.admin-customer-toolbar {
+  padding: 16px 0;
+}
+
+.admin-customer-toolbar input {
+  width: 100%;
+  max-width: 420px;
+  padding: 11px 13px;
+  border: 1px solid #e2e5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #20231f;
+  font: inherit;
+}
+
+.admin-customers-table {
+  min-width: 1000px;
+}
+
+.admin-customer-identity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 190px;
+}
+
+.admin-customer-identity > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-customer-identity small {
+  color: #858b84;
+  font-size: 12px;
+}
+
+.admin-customer-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf3e8;
+  color: #315b37;
+  font-weight: 700;
+}
+
+.admin-customer-segment {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #f0f1ef;
+  color: #555b53;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-customer-segment.high-value,
+.admin-customer-segment.repeat {
+  background: #e7f5eb;
+  color: #247342;
+}
+
+.admin-customer-segment.new {
+  background: #eaf1ff;
+  color: #365b9b;
+}
+
+.admin-customer-segment.at-risk {
+  background: #fdebea;
+  color: #b33b35;
+}
+
+.admin-customer-segment.no-purchase {
+  background: #f0f1ef;
+  color: #666b64;
+}
+
+.admin-customer-history {
+  min-width: 130px;
+}
+
+.admin-customer-history summary {
+  cursor: pointer;
+  color: #315b37;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-customer-history-content {
+  min-width: 230px;
+  max-width: 320px;
+  padding-top: 12px;
+}
+
+.admin-customer-order {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e8eae6;
+  font-size: 12px;
+}
+
+.admin-customer-order > span {
+  color: #777e75;
+}
+
+@media (max-width: 1000px) {
+  .admin-customer-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .admin-customer-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .admin-customer-tabs {
+    gap: 6px;
+  }
+
+  .admin-customer-tab {
+    font-size: 12px;
+    padding: 7px 9px;
+  }
+
+  .admin-customer-toolbar input {
+    max-width: none;
+  }
+}
+
+
