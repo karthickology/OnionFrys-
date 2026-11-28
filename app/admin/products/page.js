@@ -2,9 +2,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { formatPrice } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
+
+function formatProductPrice(price, currency) {
+  return new Intl.NumberFormat("en-AE", {
+    style: "currency",
+    currency: currency || "AED",
+  }).format(Number(price) || 0);
+}
 
 export default async function AdminProductsPage({ searchParams }) {
   const supabase = await createClient();
@@ -212,7 +218,6 @@ export default async function AdminProductsPage({ searchParams }) {
                           <div className="admin-product-placeholder">
                             {product.name.charAt(0).toUpperCase()}
                           </div>
-
                           <div>
                             <strong>{product.name}</strong>
                             <small>{product.slug}</small>
@@ -222,8 +227,8 @@ export default async function AdminProductsPage({ searchParams }) {
 
                       <td>
                         <strong>
-                          {formatPrice(
-                            Number(product.price),
+                          {formatProductPrice(
+                            product.price,
                             product.currency
                           )}
                         </strong>
