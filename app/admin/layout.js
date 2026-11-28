@@ -74,6 +74,7 @@ export default function AdminLayout({ children }) {
           <Link href="/" className="admin-store-link">
             ↗ View storefront
           </Link>
+
           <SignOutButton />
         </div>
       </aside>
