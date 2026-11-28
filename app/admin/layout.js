@@ -68,13 +68,12 @@ export default function AdminLayout({ children }) {
               )
             )}
           </div>
-        )}
-
+        ))}
+        
         <div className="admin-sidebar-bottom">
           <Link href="/" className="admin-store-link">
             ↗ View storefront
           </Link>
-
           <SignOutButton />
         </div>
       </aside>
