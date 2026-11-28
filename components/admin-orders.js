@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { formatPrice } from "@/lib/format-price";
 import { updateOrderStatus } from "@/app/admin/actions";
 
@@ -13,11 +13,34 @@ const statuses = [
   "failed",
 ];
 
+function statusClass(status) {
+  return `admin-order-status ${String(status || "pending").toLowerCase()}`;
+}
+
 export default function AdminOrders({ initialOrders }) {
-  const [orders, setOrders] = useState(initialOrders);
+  const [orders, setOrders] = useState(initialOrders || []);
   const [drafts, setDrafts] = useState({});
   const [savingId, setSavingId] = useState("");
   const [messages, setMessages] = useState({});
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const term = search.trim().toLowerCase();
+
+      const matchesSearch =
+        !term ||
+        (order.order_number || "").toLowerCase().includes(term) ||
+        (order.customer_name || "").toLowerCase().includes(term) ||
+        (order.customer_email || "").toLowerCase().includes(term);
+
+      const matchesStatus =
+        statusFilter === "all" || order.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [orders, search, statusFilter]);
 
   async function saveStatus(orderId, currentStatus) {
     const newStatus = drafts[orderId] || currentStatus;
@@ -31,7 +54,6 @@ export default function AdminOrders({ initialOrders }) {
     }
 
     setSavingId(orderId);
-
     setMessages((current) => ({
       ...current,
       [orderId]: "Saving status...",
@@ -79,121 +101,167 @@ export default function AdminOrders({ initialOrders }) {
   }
 
   if (orders.length === 0) {
-    return <p className="muted">No orders have been placed yet.</p>;
+    return (
+      <div className="admin-empty-state">
+        <h3>No orders yet</h3>
+        <p className="muted">Customer orders will appear here.</p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      {orders.map((order) => (
-        <article
-          key={order.id}
-          className="admin-card"
-          style={{ marginTop: 20 }}
+    <div className="admin-orders">
+      <div className="admin-orders-toolbar">
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search order number, customer or email..."
+          aria-label="Search orders"
+        />
+
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+          aria-label="Filter orders by status"
         >
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 12
-          }}>
-            <div>
-              <h2>{order.order_number}</h2>
-              <p className="muted">
-                {new Date(order.created_at).toLocaleString()}
-              </p>
-            </div>
-
-            <div>
-              <strong>{formatPrice(Number(order.total))}</strong>
-              <p className="muted">
-                Payment: {order.payment_status}
-              </p>
-            </div>
-          </div>
-
-          <hr />
-
-          <p>
-            <strong>Customer:</strong>{" "}
-            {order.customer_name || "Not provided"}
-          </p>
-
-          <p>
-            <strong>Email:</strong> {order.customer_email}
-          </p>
-
-          <p>
-            <strong>Order status:</strong> {order.status}
-          </p>
-
-          <h3>Purchased products</h3>
-
-          {(order.order_items || []).map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 12,
-                padding: "8px 0",
-                borderBottom: "1px solid #eee",
-              }}
-            >
-              <span>
-                {item.product_name} × {item.quantity}
-              </span>
-              <strong>
-                {formatPrice(Number(item.line_total))}
-              </strong>
-            </div>
+          <option value="all">All order statuses</option>
+          {statuses.map((status) => (
+            <option key={status} value={status}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </option>
           ))}
+        </select>
 
-          <div style={{ marginTop: 18 }}>
-            <label>
-              Update order status
-              <select
-                value={drafts[order.id] ?? order.status}
-                disabled={savingId === order.id}
-                onChange={(event) =>
-                  setDrafts((current) => ({
-                    ...current,
-                    [order.id]: event.target.value,
-                  }))
-                }
-                style={{
-                  display: "block",
-                  width: "100%",
-                  maxWidth: 300,
-                  padding: 10,
-                  marginTop: 8,
-                }}
-              >
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </label>
+        <span className="admin-result-count">
+          {filteredOrders.length} of {orders.length} orders
+        </span>
+      </div>
 
-            <button
-              className="button primary"
-              type="button"
-              disabled={savingId === order.id}
-              onClick={() => saveStatus(order.id, order.status)}
-              style={{ marginTop: 12 }}
-            >
-              {savingId === order.id ? "Saving..." : "Save status"}
-            </button>
+      <div className="admin-table-scroll">
+        <table className="admin-products-table admin-orders-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Products</th>
+              <th>Total</th>
+              <th>Payment</th>
+              <th>Order status</th>
+              <th>Update status</th>
+            </tr>
+          </thead>
 
-            {messages[order.id] && (
-              <p role="status" className="muted">
-                {messages[order.id]}
-              </p>
-            )}
+          <tbody>
+            {filteredOrders.map((order) => (
+              <tr key={order.id}>
+                <td>
+                  <strong>{order.order_number || "—"}</strong>
+                </td>
+
+                <td>
+                  <div className="admin-order-customer">
+                    <strong>{order.customer_name || "Guest customer"}</strong>
+                    <small>{order.customer_email || "No email"}</small>
+                  </div>
+                </td>
+
+                <td>
+                  {new Date(order.created_at).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                  <small className="admin-order-time">
+                    {new Date(order.created_at).toLocaleTimeString("en-GB", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </small>
+                </td>
+
+                <td>
+                  <div className="admin-order-items">
+                    {(order.order_items || []).map((item) => (
+                      <div key={item.id}>
+                        {item.product_name} <span>× {item.quantity}</span>
+                      </div>
+                    ))}
+                    {(!order.order_items || order.order_items.length === 0) && (
+                      <span className="admin-muted-label">No items listed</span>
+                    )}
+                  </div>
+                </td>
+
+                <td>
+                  <strong>
+                    {formatPrice(Number(order.total))}
+                  </strong>
+                </td>
+
+                <td>
+                  <span className={statusClass(order.payment_status)}>
+                    {order.payment_status || "Unknown"}
+                  </span>
+                </td>
+
+                <td>
+                  <span className={statusClass(order.status)}>
+                    {order.status || "Unknown"}
+                  </span>
+                </td>
+
+                <td>
+                  <div className="admin-order-update">
+                    <select
+                      value={drafts[order.id] ?? order.status}
+                      disabled={savingId === order.id}
+                      onChange={(event) =>
+                        setDrafts((current) => ({
+                          ...current,
+                          [order.id]: event.target.value,
+                        }))
+                      }
+                      aria-label={`New status for ${order.order_number}`}
+                    >
+                      {statuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      className="button primary admin-order-save"
+                      type="button"
+                      disabled={savingId === order.id}
+                      onClick={() => saveStatus(order.id, order.status)}
+                    >
+                      {savingId === order.id ? "Saving..." : "Save"}
+                    </button>
+
+                    {messages[order.id] && (
+                      <small className="admin-order-message" role="status">
+                        {messages[order.id]}
+                      </small>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {filteredOrders.length === 0 && (
+          <div className="admin-empty-state">
+            <h3>No matching orders</h3>
+            <p className="muted">
+              Try a different search or status filter.
+            </p>
           </div>
-        </article>
-      ))}
+        )}
+      </div>
     </div>
   );
 }
