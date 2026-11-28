@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/sign-out-button";
 import AdminOrders from "@/components/admin-orders";
 import AdminCustomers from "@/components/admin-customers";
+import AdminActivity from "@/components/admin-activity";
 
 export const dynamic = "force-dynamic";
 
@@ -332,72 +333,12 @@ export default async function AdminPage() {
       </section>
 
       {/* RECENT ACTIVITY */}
-      <div className="admin-product-stats">
-        <section className="admin-panel">
-          <div className="admin-panel-heading">
-            <div>
-              <h2>Recent customer carts</h2>
-              <p className="muted">Latest cart activity.</p>
-            </div>
-          </div>
-
-          {cartsError ? (
-            <p className="muted">Cart information unavailable.</p>
-          ) : !allCarts.length ? (
-            <p className="muted">No customer carts found.</p>
-          ) : (
-            allCarts.slice(0, 8).map((cart) => (
-              <div key={cart.id}>
-                <p>
-                  <strong>{cart.email || cart.user_id}</strong>
-                </p>
-                <p className="muted">
-                  {cart.status} ·{" "}
-                  {Array.isArray(cart.items) ? cart.items.length : 0} products
-                </p>
-                <p className="muted">
-                  {cart.last_activity_at
-                    ? new Date(cart.last_activity_at).toLocaleString()
-                    : "Activity time unavailable"}
-                </p>
-                <hr />
-              </div>
-            ))
-          )}
-        </section>
-
-        <section className="admin-panel">
-          <div className="admin-panel-heading">
-            <div>
-              <h2>Automation activity</h2>
-              <p className="muted">Latest campaign executions.</p>
-            </div>
-          </div>
-
-          {logsError ? (
-            <p>Unable to load logs: {logsError.message}</p>
-          ) : !automationLogs?.length ? (
-            <p className="muted">
-              No automation executions recorded yet.
-            </p>
-          ) : (
-            automationLogs.slice(0, 8).map((log) => (
-              <div key={log.id}>
-                <p>
-                  <strong>{log.automation_type}</strong>
-                </p>
-                <p className="muted">
-                  {log.status} ·{" "}
-                  {log.executed_at
-                    ? new Date(log.executed_at).toLocaleString()
-                    : "Time unavailable"}
-                </p>
-                <hr />
-              </div>
-            ))
-          )}
-        </section>
-      </div>
+      <AdminActivity
+        carts={allCarts}
+        cartsError={cartsError}
+        automationLogs={automationLogs}
+        logsError={logsError}
+      />
     </main>
   );
 }
