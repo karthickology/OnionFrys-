@@ -1049,3 +1049,151 @@ button, a { -webkit-tap-highlight-color: transparent; }
   }
 }
 
+
+
+
+/* ADMIN ORDER MANAGEMENT */
+
+.admin-orders {
+  width: 100%;
+}
+
+.admin-orders-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.admin-orders-toolbar input {
+  flex: 1;
+  min-width: 220px;
+  padding: 11px 13px;
+  border: 1px solid #e2e5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #20231f;
+  font: inherit;
+}
+
+.admin-orders-toolbar select,
+.admin-order-update select {
+  padding: 10px 12px;
+  border: 1px solid #e2e5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #20231f;
+  font: inherit;
+  max-width: 100%;
+}
+
+.admin-orders-table {
+  min-width: 1050px;
+}
+
+.admin-orders-table th,
+.admin-orders-table td {
+  vertical-align: top;
+}
+
+.admin-order-customer {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 150px;
+}
+
+.admin-order-customer small,
+.admin-order-time {
+  display: block;
+  color: #858b84;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.admin-order-items {
+  min-width: 145px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.admin-order-items span {
+  color: #858b84;
+}
+
+.admin-order-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #f0f1ef;
+  color: #555b53;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.admin-order-status.paid,
+.admin-order-status.completed {
+  background: #e7f5eb;
+  color: #247342;
+}
+
+.admin-order-status.pending,
+.admin-order-status.processing {
+  background: #fff4dc;
+  color: #936514;
+}
+
+.admin-order-status.failed,
+.admin-order-status.cancelled {
+  background: #fdebea;
+  color: #b33b35;
+}
+
+.admin-order-update {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 125px;
+}
+
+.admin-order-update select {
+  width: 100%;
+  min-width: 120px;
+}
+
+.admin-order-save {
+  padding: 7px 13px;
+  font-size: 12px;
+}
+
+.admin-order-message {
+  max-width: 150px;
+  color: #697168;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.admin-order-update button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 650px) {
+  .admin-orders-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-orders-toolbar input,
+  .admin-orders-toolbar select {
+    width: 100%;
+  }
+}
+
