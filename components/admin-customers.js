@@ -1,8 +1,15 @@
 
+"use client";
+
+import { useMemo, useState } from "react";
+
 function formatDate(value) {
   if (!value) return "No purchases yet";
 
-  return new Date(value).toLocaleDateString("en-GB", {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -24,19 +31,37 @@ function getCustomerSegment(customer) {
   if (totalSpent >= 100) return "High value";
   if (paidOrders >= 2) return "Repeat";
 
+  const registrationDate = new Date(customer.registration_date);
   const registeredDays =
-    (Date.now() - new Date(customer.registration_date).getTime()) /
-    (1000 * 60 * 60 * 24);
+    (Date.now() - registrationDate.getTime()) / (1000 * 60 * 60 * 24);
 
-  if (registeredDays <= 30) return "New";
+  if (
+    customer.registration_date &&
+    !Number.isNaN(registrationDate.getTime()) &&
+    registeredDays <= 30
+  ) {
+    return "New";
+  }
 
+  const purchaseDate = new Date(customer.last_purchase);
   const daysSincePurchase =
-    (Date.now() - new Date(customer.last_purchase).getTime()) /
-    (1000 * 60 * 60 * 24);
+    (Date.now() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24);
 
-  if (daysSincePurchase > 90) return "At risk";
+  if (
+    customer.last_purchase &&
+    !Number.isNaN(purchaseDate.getTime()) &&
+    daysSincePurchase > 90
+  ) {
+    return "At risk";
+  }
 
   return "Active";
+}
+
+function segmentClass(segment) {
+  return `admin-customer-segment ${segment
+    .toLowerCase()
+    .replace(/\s+/g, "-")}`;
 }
 
 export default function AdminCustomers({
@@ -46,159 +71,249 @@ export default function AdminCustomers({
   const customers = initialCustomers || [];
   const orders = initialOrders || [];
 
-  const segmentCounts = customers.reduce((counts, customer) => {
-    const segment = getCustomerSegment(customer);
-    counts[segment] = (counts[segment] || 0) + 1;
-    return counts;
-  }, {});
+  const [search, setSearch] = useState("");
+  const [activeSegment, setActiveSegment] = useState("All");
+
+  const segmentCounts = useMemo(() => {
+    return customers.reduce((counts, customer) => {
+      const segment = getCustomerSegment(customer);
+      counts[segment] = (counts[segment] || 0) + 1;
+      return counts;
+    }, {});
+  }, [customers]);
+
+  const filteredCustomers = useMemo(() => {
+    return customers.filter((customer) => {
+      const term = search.trim().toLowerCase();
+
+      const matchesSearch =
+        !term ||
+        (customer.full_name || "").toLowerCase().includes(term) ||
+        (customer.email || "").toLowerCase().includes(term);
+
+      const matchesSegment =
+        activeSegment === "All" ||
+        getCustomerSegment(customer) === activeSegment;
+
+      return matchesSearch && matchesSegment;
+    });
+  }, [customers, search, activeSegment]);
+
+  const segments = [
+    "All",
+    "New",
+    "High value",
+    "Repeat",
+    "Active",
+    "At risk",
+    "No purchase",
+  ];
 
   return (
-    <section className="admin-card">
-      <span className="pill">MODULE 5B + 5C</span>
-      <h2>Customer CRM</h2>
-      <p className="muted">
-        Customer profiles, spending, purchase history and segmentation.
-      </p>
+    <section className="admin-customers">
+      <div className="admin-customer-stats">
+        <div className="admin-stat-card">
+          <span>Total customers</span>
+          <strong>{customers.length}</strong>
+          <small>Registered customers</small>
+        </div>
 
-      <p>
-        <strong>Total customers:</strong> {customers.length}
-      </p>
+        <div className="admin-stat-card">
+          <span>High value</span>
+          <strong>{segmentCounts["High value"] || 0}</strong>
+          <small>Spent $100 or more</small>
+        </div>
 
-      <h3>Customer segments</h3>
+        <div className="admin-stat-card">
+          <span>Repeat customers</span>
+          <strong>{segmentCounts.Repeat || 0}</strong>
+          <small>Two or more paid orders</small>
+        </div>
 
-      <div style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "10px",
-        marginBottom: "20px"
-      }}>
-        {Object.entries(segmentCounts).map(([segment, count]) => (
-          <span
-            key={segment}
-            className="pill"
-            style={{ padding: "8px 12px" }}
-          >
-            {segment}: {count}
-          </span>
-        ))}
+        <div className="admin-stat-card">
+          <span>No purchase</span>
+          <strong>{segmentCounts["No purchase"] || 0}</strong>
+          <small>Registered without paid orders</small>
+        </div>
       </div>
 
-      {customers.length === 0 ? (
-        <p className="muted">No customers found.</p>
-      ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            textAlign: "left",
-            minWidth: "850px"
-          }}>
-            <thead>
-              <tr>
-                {[
-                  "Customer",
-                  "Email",
-                  "Segment",
-                  "Registered",
-                  "Paid orders",
-                  "Total spent",
-                  "Last purchase",
-                  "History"
-                ].map((heading) => (
-                  <th key={heading} style={{
-                    padding: "12px 10px",
-                    borderBottom: "1px solid var(--border, #ddd)"
-                  }}>
-                    {heading}
-                  </th>
-                ))}
-              </tr>
-            </thead>
+      <section className="admin-panel">
+        <div className="admin-panel-heading">
+          <div>
+            <div className="eyebrow">CUSTOMER RELATIONSHIP MANAGEMENT</div>
+            <h2>Customer directory</h2>
+            <p className="muted">
+              Customer profiles, spending, purchase history and segmentation.
+            </p>
+          </div>
 
-            <tbody>
-              {customers.map((customer) => {
-                const customerOrders = orders.filter(
-                  (order) => order.user_id === customer.customer_id
-                );
-
-                const segment = getCustomerSegment(customer);
-
-                return (
-                  <tr key={customer.customer_id}>
-                    <td style={{ padding: "12px 10px" }}>
-                      <strong>{customer.full_name || "Unnamed"}</strong>
-                      <div className="muted">
-                        {customer.phone || "No phone"}
-                      </div>
-                    </td>
-
-                    <td style={{ padding: "12px 10px" }}>
-                      {customer.email || "No email"}
-                    </td>
-
-                    <td style={{ padding: "12px 10px" }}>
-                      <span className="pill">{segment}</span>
-                    </td>
-
-                    <td style={{ padding: "12px 10px" }}>
-                      {formatDate(customer.registration_date)}
-                    </td>
-
-                    <td style={{ padding: "12px 10px" }}>
-                      {customer.total_paid_orders}
-                    </td>
-
-                    <td style={{ padding: "12px 10px" }}>
-                      {formatMoney(customer.total_spent)}
-                    </td>
-
-                    <td style={{ padding: "12px 10px" }}>
-                      {formatDate(customer.last_purchase)}
-                    </td>
-
-                    <td style={{ padding: "12px 10px" }}>
-                      <details>
-                        <summary style={{ cursor: "pointer" }}>
-                          View orders ({customerOrders.length})
-                        </summary>
-
-                        {customerOrders.length === 0 ? (
-                          <p className="muted">No orders found.</p>
-                        ) : (
-                          <div style={{ minWidth: "220px" }}>
-                            {customerOrders.map((order) => (
-                              <div key={order.id} style={{
-                                padding: "10px 0",
-                                borderBottom: "1px solid var(--border, #ddd)"
-                              }}>
-                                <strong>
-                                  Order #{order.order_number}
-                                </strong>
-                                <div className="muted">
-                                  {formatDate(order.created_at)}
-                                </div>
-                                <div>
-                                  {formatMoney(order.total)} · {order.payment_status}
-                                </div>
-
-                                {(order.order_items || []).map((item) => (
-                                  <div key={item.id} className="muted">
-                                    {item.product_name} × {item.quantity}
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </details>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <span className="admin-result-count">
+            {filteredCustomers.length} of {customers.length} customers
+          </span>
         </div>
-      )}
+
+        <div className="admin-customer-tabs">
+          {segments.map((segment) => {
+            const count =
+              segment === "All"
+                ? customers.length
+                : segmentCounts[segment] || 0;
+
+            return (
+              <button
+                key={segment}
+                type="button"
+                className={
+                  activeSegment === segment
+                    ? "admin-customer-tab active"
+                    : "admin-customer-tab"
+                }
+                onClick={() => setActiveSegment(segment)}
+              >
+                {segment}
+                <span>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="admin-customer-toolbar">
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search customer name or email..."
+            aria-label="Search customers"
+          />
+        </div>
+
+        {customers.length === 0 ? (
+          <div className="admin-empty-state">
+            <h3>No customers found</h3>
+            <p className="muted">Registered customers will appear here.</p>
+          </div>
+        ) : (
+          <div className="admin-table-scroll">
+            <table className="admin-products-table admin-customers-table">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Segment</th>
+                  <th>Registered</th>
+                  <th>Paid orders</th>
+                  <th>Total spent</th>
+                  <th>Last purchase</th>
+                  <th>Purchase history</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredCustomers.map((customer) => {
+                  const customerOrders = orders.filter(
+                    (order) => order.user_id === customer.customer_id
+                  );
+
+                  const segment = getCustomerSegment(customer);
+
+                  return (
+                    <tr key={customer.customer_id}>
+                      <td>
+                        <div className="admin-customer-identity">
+                          <div className="admin-customer-avatar">
+                            {(customer.full_name || "U")
+                              .charAt(0)
+                              .toUpperCase()}
+                          </div>
+
+                          <div>
+                            <strong>
+                              {customer.full_name || "Unnamed customer"}
+                            </strong>
+                            <small>{customer.email || "No email"}</small>
+                            <small>{customer.phone || "No phone"}</small>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td>
+                        <span className={segmentClass(segment)}>
+                          {segment}
+                        </span>
+                      </td>
+
+                      <td>{formatDate(customer.registration_date)}</td>
+
+                      <td>
+                        <strong>
+                          {Number(customer.total_paid_orders || 0)}
+                        </strong>
+                      </td>
+
+                      <td>
+                        <strong>{formatMoney(customer.total_spent)}</strong>
+                      </td>
+
+                      <td>{formatDate(customer.last_purchase)}</td>
+
+                      <td>
+                        <details className="admin-customer-history">
+                          <summary>
+                            View orders ({customerOrders.length})
+                          </summary>
+
+                          <div className="admin-customer-history-content">
+                            {customerOrders.length === 0 ? (
+                              <p className="muted">No orders found.</p>
+                            ) : (
+                              customerOrders.map((order) => (
+                                <div
+                                  key={order.id}
+                                  className="admin-customer-order"
+                                >
+                                  <strong>
+                                    #{order.order_number || order.id}
+                                  </strong>
+
+                                  <span>
+                                    {formatDate(order.created_at)}
+                                  </span>
+
+                                  <strong>
+                                    {formatMoney(order.total)}
+                                  </strong>
+
+                                  <span className="admin-muted-label">
+                                    Payment: {order.payment_status || "Unknown"}
+                                  </span>
+
+                                  {(order.order_items || []).map((item) => (
+                                    <small key={item.id}>
+                                      {item.product_name} × {item.quantity}
+                                    </small>
+                                  ))}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </details>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {filteredCustomers.length === 0 && (
+              <div className="admin-empty-state">
+                <h3>No matching customers</h3>
+                <p className="muted">
+                  Try another search or customer segment.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
     </section>
   );
 }
