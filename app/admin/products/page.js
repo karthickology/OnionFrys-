@@ -11,10 +11,14 @@ export default async function AdminProductsPage() {
 
   if (!supabase) redirect("/login?next=/admin/products");
 
-  const { data: { user }, error: userError } =
-    await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (userError || !user) redirect("/login?next=/admin/products");
+  if (userError || !user) {
+    redirect("/login?next=/admin/products");
+  }
 
   const { data: isAdmin } = await supabase.rpc("is_admin");
 
@@ -28,7 +32,10 @@ export default async function AdminProductsPage() {
   return (
     <main className="site-shell">
       <header className="topbar">
-        <Link className="brand" href="/">onion<span>frys.</span></Link>
+        <Link className="brand" href="/">
+          onion<span>frys.</span>
+        </Link>
+
         <nav className="nav">
           <Link href="/admin">Admin dashboard</Link>
           <Link href="/">Storefront</Link>
@@ -37,10 +44,21 @@ export default async function AdminProductsPage() {
 
       <section className="admin-wrap">
         <div className="eyebrow">ADMINISTRATION / CATALOGUE</div>
+
         <h1 className="admin-title">Product management</h1>
+
         <p className="muted">
           Manage your product catalogue and publication status.
         </p>
+
+        <div style={{ margin: "20px 0" }}>
+          <Link
+            href="/admin/products/new"
+            className="button primary"
+          >
+            + Add New Product
+          </Link>
+        </div>
 
         <div className="admin-card">
           <h2>Products ({products?.length || 0})</h2>
@@ -51,17 +69,27 @@ export default async function AdminProductsPage() {
             <p className="muted">No products found.</p>
           ) : (
             products.map((product) => (
-              <article key={product.id} style={{
-                padding: "16px 0",
-                borderBottom: "1px solid #e5e7df"
-              }}>
+              <article
+                key={product.id}
+                style={{
+                  padding: "16px 0",
+                  borderBottom: "1px solid #e5e7df",
+                }}
+              >
                 <h3>{product.name}</h3>
-                <p className="muted">SKU slug: {product.slug}</p>
+                <p className="muted">Slug: {product.slug}</p>
                 <p>
-                  {formatPrice(Number(product.price), product.currency)}
+                  {formatPrice(
+                    Number(product.price),
+                    product.currency
+                  )}
                 </p>
-                <p>Status: <strong>{product.status}</strong></p>
-                <p>Featured: {product.is_featured ? "Yes" : "No"}</p>
+                <p>
+                  Status: <strong>{product.status}</strong>
+                </p>
+                <p>
+                  Featured: {product.is_featured ? "Yes" : "No"}
+                </p>
               </article>
             ))
           )}
